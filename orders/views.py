@@ -8,6 +8,7 @@ from django.utils import timezone
 from .forms import OrderCreateForm, OrderDecisionForm, OrderEditForm
 from .models import Order
 from django.urls import reverse
+from django.contrib.auth import get_user_model
 
 
 def get_visible_orders_for_user(user):
@@ -105,9 +106,19 @@ def order_list(request):
 
     orders = get_visible_orders_for_user(request.user)
 
+    User = get_user_model()
+
+    visible_user_ids = (
+        orders.values_list("user_id", flat=True)
+        .distinct()
+    )
+
+    visible_users = User.objects.filter(id__in=visible_user_ids).order_by("name", "email")
+
     search = request.GET.get("search", "").strip()
     status_filter = request.GET.get("status", "").strip()
     store_filter = request.GET.get("store", "").strip()
+    user_filter = request.GET.get("user_filter", "").strip()
     ordernumber_filter = request.GET.get("ordernumber", "").strip()
     ordernumber_presence_filter = request.GET.get("ordernumber_presence_filter", "").strip()
     finance_order_date_filter = request.GET.get("finance_order_date_filter", "").strip()
@@ -135,6 +146,9 @@ def order_list(request):
 
     if store_filter:
         orders = orders.filter(store__icontains=store_filter)
+
+    if user_filter:
+        orders = orders.filter(user_id=user_filter)
 
     if ordernumber_filter:
         orders = orders.filter(ordernumber=ordernumber_filter)
@@ -195,6 +209,8 @@ def order_list(request):
         "search": search,
         "status_filter": status_filter,
         "store_filter": store_filter,
+        "user_filter": user_filter,
+        "visible_users": visible_users,
         "ordernumber_filter": ordernumber_filter,
         "ordernumber_presence_filter": ordernumber_presence_filter,
         "finance_order_date_filter": finance_order_date_filter,
