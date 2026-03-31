@@ -58,6 +58,10 @@
             <a href="{% url 'orders:order_edit' order.id %}">Edit this order</a>
             |
         {% endif %}
+        {% if can_decide %}
+            <a href="{% url 'orders:order_decide' order.id %}">Approve / reject / request rework</a>
+            |
+        {% endif %}
         <a href="{% url 'orders:order_list' %}">Back to orders</a>
     </p>
 {% endblock %}

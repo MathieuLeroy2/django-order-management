@@ -10,38 +10,108 @@
     </p>
 
     {% if orders %}
-        <table border="1" cellpadding="8" cellspacing="0" style="border-collapse: collapse; width: 100%;">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Description</th>
-                    <th>User</th>
-                    <th>Type</th>
-                    <th>Status</th>
-                    <th>Store</th>
-                    <th>Quantity</th>
-                    <th>Created</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for order in orders %}
+        <div class="order-table-wrapper">
+            <table class="order-table">
+                <thead>
                     <tr>
-                        <td>{{ order.id }}</td>
-                        <td>
-                            <a href="{% url 'orders:order_detail' order.id %}">
-                                {{ order.short_description }}
-                            </a>
-                        </td>
-                        <td>{{ order.user.name }}</td>
-                        <td>{{ order.get_order_type_display }}</td>
-                        <td>{{ order.get_status_display }}</td>
-                        <td>{{ order.store }}</td>
-                        <td>{{ order.quantity }}</td>
-                        <td>{{ order.created_at|date:"Y-m-d H:i" }}</td>
+                        <th>ID</th>
+                        <th>Description</th>
+                        <th>User</th>
+                        <th>Store</th>
+                        <th>Article number</th>
+                        <th>Quantity</th>
+                        <th>URL</th>
+                        <th>Price excl. VAT</th>
+                        <th>Delivery days</th>
+                        <th>Student remarks</th>
+                        <th>Teacher remarks</th>
+                        <th>Status</th>
+                        <th>Decision reason</th>
+                        <th>Decided by</th>
+                        <th>Decided at</th>
+                        <th>Created</th>
+                        <th>Actions</th>
                     </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                    {% for order in orders %}
+                        <tr>
+                            <td>{{ order.id }}</td>
+                            <td class="wrap">
+                                <a href="{% url 'orders:order_detail' order.id %}">
+                                    {{ order.short_description }}
+                                </a>
+                            </td>
+                            <td>{{ order.user.name }}</td>
+                            <td>{{ order.store }}</td>
+                            <td>{{ order.article_number|default:"-" }}</td>
+                            <td>{{ order.quantity }}</td>
+                            <td>
+                                {% if order.url %}
+                                    <a href="{{ order.url }}" target="_blank" rel="noopener noreferrer">Link</a>
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </td>
+                            <td>{{ order.total_price_excl_vat|default:"-" }}</td>
+                            <td>{{ order.delivery_time_days|default:"-" }}</td>
+                            <td class="wrap">{{ order.student_remarks|default:"-" }}</td>
+                            <td class="wrap">{{ order.teacher_remarks|default:"-" }}</td>
+                            <td>{{ order.get_status_display }}</td>
+                            <td class="wrap">{{ order.decision_reason|default:"-" }}</td>
+                            <td>
+                                {% if order.decided_by %}
+                                    {{ order.decided_by.name }}
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if order.decided_at %}
+                                    {{ order.decided_at|date:"Y-m-d H:i" }}
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </td>
+                            <td>{{ order.created_at|date:"Y-m-d H:i" }}</td>
+                            <td>
+                                {% if user.role == "admin" or user.role == "teacher" %}
+                                    {% if user.role == "admin" or order.order_type == "student_order" or order.user_id == user.id %}
+                                        <form method="post" style="min-width: 180px;">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="update_order_id" value="{{ order.id }}">
+
+                                            <p style="margin: 0 0 6px 0;">
+                                                <select name="decision">
+                                                    <option value="submitted" {% if order.status == "submitted" %}selected{% endif %}>Submitted</option>
+                                                    <option value="approved" {% if order.status == "approved" %}selected{% endif %}>Approved</option>
+                                                    <option value="rejected" {% if order.status == "rejected" %}selected{% endif %}>Rejected</option>
+                                                    <option value="rework" {% if order.status == "rework" %}selected{% endif %}>Needs rework</option>
+                                                </select>
+                                            </p>
+
+                                            <p style="margin: 0 0 6px 0;">
+                                                <textarea name="decision_reason" rows="2">{{ order.decision_reason }}</textarea>
+                                            </p>
+
+                                            <button type="submit">Update</button>
+                                        </form>
+                                    {% else %}
+                                        -
+                                    {% endif %}
+                                {% else %}
+                                    {% if order.user_id == user.id and order.status != "approved" %}
+                                        <a href="{% url 'orders:order_edit' order.id %}">Edit</a>
+                                    {% else %}
+                                        -
+                                    {% endif %}
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
     {% else %}
         <div class="card">
             <p>No orders found.</p>

@@ -33,3 +33,30 @@ class OrderCreateForm(OrderBaseForm):
 
 class OrderEditForm(OrderBaseForm):
     pass
+
+
+class OrderDecisionForm(forms.Form):
+    decision = forms.ChoiceField(
+        choices=[
+            (Order.STATUS_SUBMITTED, "Submitted"),
+            (Order.STATUS_APPROVED, "Approved"),
+            (Order.STATUS_REJECTED, "Rejected"),
+            (Order.STATUS_REWORK, "Needs rework"),
+        ]
+    )
+    decision_reason = forms.CharField(
+        required=False,
+        widget=forms.Textarea(attrs={"rows": 2}),
+    )
+
+    def clean(self):
+        cleaned_data = super().clean()
+        decision = cleaned_data.get("decision")
+        decision_reason = (cleaned_data.get("decision_reason") or "").strip()
+
+        if decision in [Order.STATUS_REJECTED, Order.STATUS_REWORK] and not decision_reason:
+            raise forms.ValidationError(
+                "A reason is required when rejecting an order or requesting rework."
+            )
+
+        return cleaned_data

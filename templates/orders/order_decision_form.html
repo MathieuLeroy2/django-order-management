@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block title %}Decide Order {{ order.id }}{% endblock %}
+
+{% block content %}
+    <h1>Decide Order {{ order.id }}</h1>
+
+    <div class="card">
+        <p><strong>Description:</strong> {{ order.short_description }}</p>
+        <p><strong>User:</strong> {{ order.user.name }} ({{ order.user.email }})</p>
+        <p><strong>Current status:</strong> {{ order.get_status_display }}</p>
+    </div>
+
+    <div class="card">
+        <form method="post">
+            {% csrf_token %}
+
+            {{ form.non_field_errors }}
+
+            {% for field in form %}
+                <p>
+                    {{ field.label_tag }}<br>
+                    {{ field }}
+                    {% if field.errors %}
+                        <br>
+                        <span style="color: red;">{{ field.errors }}</span>
+                    {% endif %}
+                </p>
+            {% endfor %}
+
+            <button type="submit">Save decision</button>
+        </form>
+    </div>
+
+    <p>
+        <a href="{% url 'orders:order_detail' order.id %}">Back to order</a>
+    </p>
+{% endblock %}

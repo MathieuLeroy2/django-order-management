@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import dashboard, order_list, order_detail, order_create, order_edit
+from .views import dashboard, order_list, order_detail, order_create, order_edit, order_decide
 
 app_name = "orders"
 
@@ -9,4 +9,5 @@ urlpatterns = [
     path("orders/create/", order_create, name="order_create"),
     path("orders/<int:order_id>/", order_detail, name="order_detail"),
     path("orders/<int:order_id>/edit/", order_edit, name="order_edit"),
+    path("orders/<int:order_id>/decide/", order_decide, name="order_decide"),
 ]
