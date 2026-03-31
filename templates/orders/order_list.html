@@ -9,6 +9,54 @@
         <a href="{% url 'orders:order_create' %}">Create a new order</a>
     </p>
 
+    <div class="card">
+        <form method="get" style="display: flex; gap: 12px; flex-wrap: wrap; align-items: end;">
+            <div>
+                <label for="search">Search</label><br>
+                <input type="text" id="search" name="search" value="{{ search }}">
+            </div>
+
+            <div>
+                <label for="status">Status</label><br>
+                <select id="status" name="status">
+                    <option value="">All</option>
+                    {% for value, label in status_choices %}
+                        <option value="{{ value }}" {% if status_filter == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div>
+                <label for="store">Store</label><br>
+                <input type="text" id="store" name="store" value="{{ store_filter }}">
+            </div>
+
+            <div>
+                <label for="sort">Sort by</label><br>
+                <select id="sort" name="sort">
+                    <option value="-created_at" {% if sort == "-created_at" %}selected{% endif %}>Newest first</option>
+                    <option value="created_at" {% if sort == "created_at" %}selected{% endif %}>Oldest first</option>
+                    <option value="status" {% if sort == "status" %}selected{% endif %}>Status A-Z</option>
+                    <option value="-status" {% if sort == "-status" %}selected{% endif %}>Status Z-A</option>
+                    <option value="store" {% if sort == "store" %}selected{% endif %}>Store A-Z</option>
+                    <option value="-store" {% if sort == "-store" %}selected{% endif %}>Store Z-A</option>
+                    <option value="quantity" {% if sort == "quantity" %}selected{% endif %}>Quantity low-high</option>
+                    <option value="-quantity" {% if sort == "-quantity" %}selected{% endif %}>Quantity high-low</option>
+                    <option value="total_price_excl_vat" {% if sort == "total_price_excl_vat" %}selected{% endif %}>Price low-high</option>
+                    <option value="-total_price_excl_vat" {% if sort == "-total_price_excl_vat" %}selected{% endif %}>Price high-low</option>
+                </select>
+            </div>
+
+            <div>
+                <button type="submit">Apply</button>
+            </div>
+
+            <div>
+                <a href="{% url 'orders:order_list' %}">Reset</a>
+            </div>
+        </form>
+    </div>
+
     {% if orders %}
         <div class="order-table-wrapper">
             <table class="order-table">
@@ -100,7 +148,7 @@
                                         -
                                     {% endif %}
                                 {% else %}
-                                    {% if order.user_id == user.id and order.status != "approved" %}
+                                    {% if order.user_id == user.id and order.status != "approved" and order.status != "rejected" %}
                                         <a href="{% url 'orders:order_edit' order.id %}">Edit</a>
                                     {% else %}
                                         -

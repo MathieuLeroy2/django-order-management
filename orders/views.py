@@ -42,7 +42,7 @@ def user_can_edit_order(user, order):
     if order.user_id != user.id:
         return False
 
-    if order.status == Order.STATUS_APPROVED:
+    if order.status in [Order.STATUS_APPROVED, Order.STATUS_REJECTED]:
         return False
 
     return True
@@ -97,8 +97,51 @@ def order_list(request):
 
     orders = get_visible_orders_for_user(request.user)
 
+    search = request.GET.get("search", "").strip()
+    status_filter = request.GET.get("status", "").strip()
+    store_filter = request.GET.get("store", "").strip()
+    sort = request.GET.get("sort", "-created_at").strip()
+
+    if search:
+        orders = orders.filter(
+            Q(short_description__icontains=search)
+            | Q(store__icontains=search)
+            | Q(article_number__icontains=search)
+            | Q(student_remarks__icontains=search)
+            | Q(teacher_remarks__icontains=search)
+            | Q(decision_reason__icontains=search)
+            | Q(user__name__icontains=search)
+            | Q(user__email__icontains=search)
+        )
+
+    if status_filter:
+        orders = orders.filter(status=status_filter)
+
+    if store_filter:
+        orders = orders.filter(store__icontains=store_filter)
+
+    allowed_sort_fields = {
+        "created_at": "created_at",
+        "-created_at": "-created_at",
+        "status": "status",
+        "-status": "-status",
+        "store": "store",
+        "-store": "-store",
+        "quantity": "quantity",
+        "-quantity": "-quantity",
+        "total_price_excl_vat": "total_price_excl_vat",
+        "-total_price_excl_vat": "-total_price_excl_vat",
+    }
+    sort = allowed_sort_fields.get(sort, "-created_at")
+    orders = orders.order_by(sort)
+
     context = {
         "orders": orders,
+        "search": search,
+        "status_filter": status_filter,
+        "store_filter": store_filter,
+        "sort": sort,
+        "status_choices": Order.STATUS_CHOICES,
     }
     return render(request, "orders/order_list.html", context)
 
