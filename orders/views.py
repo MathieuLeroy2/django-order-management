@@ -100,11 +100,10 @@ def order_list(request):
     search = request.GET.get("search", "").strip()
     status_filter = request.GET.get("status", "").strip()
     store_filter = request.GET.get("store", "").strip()
-
+    ordernumber_filter = request.GET.get("ordernumber", "").strip()
     finance_order_date_filter = request.GET.get("finance_order_date_filter", "").strip()
     shipped_date_filter = request.GET.get("shipped_date_filter", "").strip()
     received_date_filter = request.GET.get("received_date_filter", "").strip()
-
     primary_sort = request.GET.get("primary_sort", "store").strip()
     secondary_sort = request.GET.get("secondary_sort", "-created_at").strip()
 
@@ -113,6 +112,7 @@ def order_list(request):
             Q(short_description__icontains=search)
             | Q(store__icontains=search)
             | Q(article_number__icontains=search)
+            | Q(ordernumber__icontains=search)
             | Q(student_remarks__icontains=search)
             | Q(teacher_remarks__icontains=search)
             | Q(decision_reason__icontains=search)
@@ -126,6 +126,9 @@ def order_list(request):
 
     if store_filter:
         orders = orders.filter(store__icontains=store_filter)
+
+    if ordernumber_filter:
+        orders = orders.filter(ordernumber=ordernumber_filter)
 
     if finance_order_date_filter == "empty":
         orders = orders.filter(finance_order_date__isnull=True)
@@ -149,6 +152,8 @@ def order_list(request):
         "-status": "-status",
         "store": "store",
         "-store": "-store",
+        "ordernumber": "ordernumber",
+        "-ordernumber": "-ordernumber",
         "quantity": "quantity",
         "-quantity": "-quantity",
         "total_price_excl_vat": "total_price_excl_vat",
@@ -176,6 +181,7 @@ def order_list(request):
         "search": search,
         "status_filter": status_filter,
         "store_filter": store_filter,
+        "ordernumber_filter": ordernumber_filter,
         "finance_order_date_filter": finance_order_date_filter,
         "shipped_date_filter": shipped_date_filter,
         "received_date_filter": received_date_filter,
@@ -219,7 +225,6 @@ def order_create(request):
                 order.order_type = Order.ORDER_TYPE_TEACHER
 
             order.save()
-
             messages.success(request, f"Order {order.id} was created successfully.")
             return redirect("orders:order_list")
     else:
@@ -282,7 +287,6 @@ def order_decide(request, order_id):
             order.decided_by = request.user
             order.decided_at = timezone.now()
             order.save()
-
             messages.success(request, f"Order {order.id} was updated successfully.")
             return redirect("orders:order_detail", order_id=order.id)
     else:

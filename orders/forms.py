@@ -8,6 +8,7 @@ class OrderBaseForm(forms.ModelForm):
         fields = [
             "store",
             "article_number",
+            "ordernumber",
             "quantity",
             "short_description",
             "url",

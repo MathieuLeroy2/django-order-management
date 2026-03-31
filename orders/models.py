@@ -34,25 +34,28 @@ class Order(models.Model):
     order_type = models.CharField(max_length=20, choices=ORDER_TYPE_CHOICES)
     store = models.CharField(max_length=255)
     article_number = models.CharField(max_length=100, blank=True)
+
+    ordernumber = models.CharField(
+        max_length=100,
+        blank=True,
+        db_index=True,
+        help_text="ERP order number"
+    )
+
     quantity = models.PositiveIntegerField(default=1)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default=STATUS_DRAFT)
     decision_reason = models.TextField(blank=True)
-
     created_at = models.DateTimeField(auto_now_add=True)
     short_description = models.CharField(max_length=255)
     url = models.URLField(blank=True)
-
     total_price_excl_vat = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     delivery_time_days = models.PositiveIntegerField(null=True, blank=True)
     purchase_request_number = models.CharField(max_length=100, blank=True)
-
     finance_order_date = models.DateField(null=True, blank=True)
     shipped_date = models.DateField(null=True, blank=True)
     received_date = models.DateField(null=True, blank=True)
-
     student_remarks = models.TextField(blank=True)
     teacher_remarks = models.TextField(blank=True)
-
     decided_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
