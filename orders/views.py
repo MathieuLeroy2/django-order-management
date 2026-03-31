@@ -101,6 +101,7 @@ def order_list(request):
     status_filter = request.GET.get("status", "").strip()
     store_filter = request.GET.get("store", "").strip()
     ordernumber_filter = request.GET.get("ordernumber", "").strip()
+    ordernumber_presence_filter = request.GET.get("ordernumber_presence_filter", "").strip()
     finance_order_date_filter = request.GET.get("finance_order_date_filter", "").strip()
     shipped_date_filter = request.GET.get("shipped_date_filter", "").strip()
     received_date_filter = request.GET.get("received_date_filter", "").strip()
@@ -129,6 +130,11 @@ def order_list(request):
 
     if ordernumber_filter:
         orders = orders.filter(ordernumber=ordernumber_filter)
+
+    if ordernumber_presence_filter == "empty":
+        orders = orders.filter(ordernumber="")
+    elif ordernumber_presence_filter == "filled":
+        orders = orders.exclude(ordernumber="")
 
     if finance_order_date_filter == "empty":
         orders = orders.filter(finance_order_date__isnull=True)
@@ -182,6 +188,7 @@ def order_list(request):
         "status_filter": status_filter,
         "store_filter": store_filter,
         "ordernumber_filter": ordernumber_filter,
+        "ordernumber_presence_filter": ordernumber_presence_filter,
         "finance_order_date_filter": finance_order_date_filter,
         "shipped_date_filter": shipped_date_filter,
         "received_date_filter": received_date_filter,

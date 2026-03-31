@@ -34,7 +34,14 @@
                 <th><input type="text" name="search" value="{{ search }}" placeholder="Search"></th>
                 <th></th>
                 <th><input type="text" name="store" value="{{ store_filter }}" placeholder="Store"></th>
-                <th><input type="text" name="ordernumber" value="{{ ordernumber_filter }}" placeholder="Exact"></th>
+                <th>
+                    <input type="text" name="ordernumber" value="{{ ordernumber_filter }}" placeholder="Exact">
+                    <select name="ordernumber_presence_filter">
+                        <option value="">All</option>
+                        <option value="empty" {% if ordernumber_presence_filter == "empty" %}selected{% endif %}>Empty</option>
+                        <option value="filled" {% if ordernumber_presence_filter == "filled" %}selected{% endif %}>Filled</option>
+                    </select>
+                </th>
                 <th></th>
                 <th></th>
                 <th></th>
