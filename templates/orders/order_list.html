@@ -32,18 +32,69 @@
             </div>
 
             <div>
-                <label for="sort">Sort by</label><br>
-                <select id="sort" name="sort">
-                    <option value="-created_at" {% if sort == "-created_at" %}selected{% endif %}>Newest first</option>
-                    <option value="created_at" {% if sort == "created_at" %}selected{% endif %}>Oldest first</option>
-                    <option value="status" {% if sort == "status" %}selected{% endif %}>Status A-Z</option>
-                    <option value="-status" {% if sort == "-status" %}selected{% endif %}>Status Z-A</option>
-                    <option value="store" {% if sort == "store" %}selected{% endif %}>Store A-Z</option>
-                    <option value="-store" {% if sort == "-store" %}selected{% endif %}>Store Z-A</option>
-                    <option value="quantity" {% if sort == "quantity" %}selected{% endif %}>Quantity low-high</option>
-                    <option value="-quantity" {% if sort == "-quantity" %}selected{% endif %}>Quantity high-low</option>
-                    <option value="total_price_excl_vat" {% if sort == "total_price_excl_vat" %}selected{% endif %}>Price low-high</option>
-                    <option value="-total_price_excl_vat" {% if sort == "-total_price_excl_vat" %}selected{% endif %}>Price high-low</option>
+                <label for="finance_order_date_filter">Finance order date</label><br>
+                <select id="finance_order_date_filter" name="finance_order_date_filter">
+                    <option value="">All</option>
+                    <option value="empty" {% if finance_order_date_filter == "empty" %}selected{% endif %}>Empty</option>
+                    <option value="filled" {% if finance_order_date_filter == "filled" %}selected{% endif %}>Filled</option>
+                </select>
+            </div>
+
+            <div>
+                <label for="shipped_date_filter">Shipped date</label><br>
+                <select id="shipped_date_filter" name="shipped_date_filter">
+                    <option value="">All</option>
+                    <option value="empty" {% if shipped_date_filter == "empty" %}selected{% endif %}>Empty</option>
+                    <option value="filled" {% if shipped_date_filter == "filled" %}selected{% endif %}>Filled</option>
+                </select>
+            </div>
+
+            <div>
+                <label for="received_date_filter">Received date</label><br>
+                <select id="received_date_filter" name="received_date_filter">
+                    <option value="">All</option>
+                    <option value="empty" {% if received_date_filter == "empty" %}selected{% endif %}>Empty</option>
+                    <option value="filled" {% if received_date_filter == "filled" %}selected{% endif %}>Filled</option>
+                </select>
+            </div>
+
+            <div>
+                <label for="primary_sort">Primary sort</label><br>
+                <select id="primary_sort" name="primary_sort">
+                    <option value="store" {% if primary_sort == "store" %}selected{% endif %}>Store A-Z</option>
+                    <option value="-store" {% if primary_sort == "-store" %}selected{% endif %}>Store Z-A</option>
+                    <option value="-created_at" {% if primary_sort == "-created_at" %}selected{% endif %}>Newest first</option>
+                    <option value="created_at" {% if primary_sort == "created_at" %}selected{% endif %}>Oldest first</option>
+                    <option value="status" {% if primary_sort == "status" %}selected{% endif %}>Status A-Z</option>
+                    <option value="-status" {% if primary_sort == "-status" %}selected{% endif %}>Status Z-A</option>
+                    <option value="quantity" {% if primary_sort == "quantity" %}selected{% endif %}>Quantity low-high</option>
+                    <option value="-quantity" {% if primary_sort == "-quantity" %}selected{% endif %}>Quantity high-low</option>
+                    <option value="total_price_excl_vat" {% if primary_sort == "total_price_excl_vat" %}selected{% endif %}>Price low-high</option>
+                    <option value="-total_price_excl_vat" {% if primary_sort == "-total_price_excl_vat" %}selected{% endif %}>Price high-low</option>
+                    <option value="finance_order_date" {% if primary_sort == "finance_order_date" %}selected{% endif %}>Finance date oldest</option>
+                    <option value="-finance_order_date" {% if primary_sort == "-finance_order_date" %}selected{% endif %}>Finance date newest</option>
+                    <option value="user__name" {% if primary_sort == "user__name" %}selected{% endif %}>User A-Z</option>
+                    <option value="-user__name" {% if primary_sort == "-user__name" %}selected{% endif %}>User Z-A</option>
+                </select>
+            </div>
+
+            <div>
+                <label for="secondary_sort">Secondary sort</label><br>
+                <select id="secondary_sort" name="secondary_sort">
+                    <option value="-created_at" {% if secondary_sort == "-created_at" %}selected{% endif %}>Newest first</option>
+                    <option value="created_at" {% if secondary_sort == "created_at" %}selected{% endif %}>Oldest first</option>
+                    <option value="store" {% if secondary_sort == "store" %}selected{% endif %}>Store A-Z</option>
+                    <option value="-store" {% if secondary_sort == "-store" %}selected{% endif %}>Store Z-A</option>
+                    <option value="status" {% if secondary_sort == "status" %}selected{% endif %}>Status A-Z</option>
+                    <option value="-status" {% if secondary_sort == "-status" %}selected{% endif %}>Status Z-A</option>
+                    <option value="quantity" {% if secondary_sort == "quantity" %}selected{% endif %}>Quantity low-high</option>
+                    <option value="-quantity" {% if secondary_sort == "-quantity" %}selected{% endif %}>Quantity high-low</option>
+                    <option value="total_price_excl_vat" {% if secondary_sort == "total_price_excl_vat" %}selected{% endif %}>Price low-high</option>
+                    <option value="-total_price_excl_vat" {% if secondary_sort == "-total_price_excl_vat" %}selected{% endif %}>Price high-low</option>
+                    <option value="finance_order_date" {% if secondary_sort == "finance_order_date" %}selected{% endif %}>Finance date oldest</option>
+                    <option value="-finance_order_date" {% if secondary_sort == "-finance_order_date" %}selected{% endif %}>Finance date newest</option>
+                    <option value="user__name" {% if secondary_sort == "user__name" %}selected{% endif %}>User A-Z</option>
+                    <option value="-user__name" {% if secondary_sort == "-user__name" %}selected{% endif %}>User Z-A</option>
                 </select>
             </div>
 

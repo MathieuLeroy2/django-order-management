@@ -100,7 +100,13 @@ def order_list(request):
     search = request.GET.get("search", "").strip()
     status_filter = request.GET.get("status", "").strip()
     store_filter = request.GET.get("store", "").strip()
-    sort = request.GET.get("sort", "-created_at").strip()
+
+    finance_order_date_filter = request.GET.get("finance_order_date_filter", "").strip()
+    shipped_date_filter = request.GET.get("shipped_date_filter", "").strip()
+    received_date_filter = request.GET.get("received_date_filter", "").strip()
+
+    primary_sort = request.GET.get("primary_sort", "store").strip()
+    secondary_sort = request.GET.get("secondary_sort", "-created_at").strip()
 
     if search:
         orders = orders.filter(
@@ -112,6 +118,7 @@ def order_list(request):
             | Q(decision_reason__icontains=search)
             | Q(user__name__icontains=search)
             | Q(user__email__icontains=search)
+            | Q(purchase_request_number__icontains=search)
         )
 
     if status_filter:
@@ -119,6 +126,21 @@ def order_list(request):
 
     if store_filter:
         orders = orders.filter(store__icontains=store_filter)
+
+    if finance_order_date_filter == "empty":
+        orders = orders.filter(finance_order_date__isnull=True)
+    elif finance_order_date_filter == "filled":
+        orders = orders.filter(finance_order_date__isnull=False)
+
+    if shipped_date_filter == "empty":
+        orders = orders.filter(shipped_date__isnull=True)
+    elif shipped_date_filter == "filled":
+        orders = orders.filter(shipped_date__isnull=False)
+
+    if received_date_filter == "empty":
+        orders = orders.filter(received_date__isnull=True)
+    elif received_date_filter == "filled":
+        orders = orders.filter(received_date__isnull=False)
 
     allowed_sort_fields = {
         "created_at": "created_at",
@@ -131,16 +153,34 @@ def order_list(request):
         "-quantity": "-quantity",
         "total_price_excl_vat": "total_price_excl_vat",
         "-total_price_excl_vat": "-total_price_excl_vat",
+        "finance_order_date": "finance_order_date",
+        "-finance_order_date": "-finance_order_date",
+        "shipped_date": "shipped_date",
+        "-shipped_date": "-shipped_date",
+        "received_date": "received_date",
+        "-received_date": "-received_date",
+        "user__name": "user__name",
+        "-user__name": "-user__name",
     }
-    sort = allowed_sort_fields.get(sort, "-created_at")
-    orders = orders.order_by(sort)
+
+    primary_sort_value = allowed_sort_fields.get(primary_sort, "store")
+    secondary_sort_value = allowed_sort_fields.get(secondary_sort, "-created_at")
+
+    if primary_sort_value == secondary_sort_value:
+        orders = orders.order_by(primary_sort_value)
+    else:
+        orders = orders.order_by(primary_sort_value, secondary_sort_value)
 
     context = {
         "orders": orders,
         "search": search,
         "status_filter": status_filter,
         "store_filter": store_filter,
-        "sort": sort,
+        "finance_order_date_filter": finance_order_date_filter,
+        "shipped_date_filter": shipped_date_filter,
+        "received_date_filter": received_date_filter,
+        "primary_sort": primary_sort,
+        "secondary_sort": secondary_sort,
         "status_choices": Order.STATUS_CHOICES,
     }
     return render(request, "orders/order_list.html", context)
