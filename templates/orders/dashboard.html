@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+    <h1>Dashboard</h1>
+
+    <div class="card">
+        <p><strong>Name:</strong> {{ user.name }}</p>
+        <p><strong>Email:</strong> {{ user.email }}</p>
+        <p><strong>Role:</strong> {{ user.role }}</p>
+    </div>
+
+    {% if user.role == "admin" %}
+        <div class="card">
+            <h2>Admin dashboard</h2>
+            <p>You can manage all orders and all users.</p>
+        </div>
+    {% elif user.role == "teacher" %}
+        <div class="card">
+            <h2>Teacher dashboard</h2>
+            <p>You can create your own orders and approve student orders and your own teacher orders.</p>
+        </div>
+    {% elif user.role == "student" %}
+        <div class="card">
+            <h2>Student dashboard</h2>
+            <p>You can create your own orders and follow their status.</p>
+        </div>
+    {% endif %}
+{% endblock %}
