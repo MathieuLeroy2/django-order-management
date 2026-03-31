@@ -23,7 +23,11 @@
                 {% for order in orders %}
                     <tr>
                         <td>{{ order.id }}</td>
-                        <td>{{ order.short_description }}</td>
+                        <td>
+                            <a href="{% url 'orders:order_detail' order.id %}">
+                                {{ order.short_description }}
+                            </a>
+                        </td>
                         <td>{{ order.user.name }}</td>
                         <td>{{ order.get_order_type_display }}</td>
                         <td>{{ order.get_status_display }}</td>

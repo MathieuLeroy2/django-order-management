@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block title %}Order {{ order.id }}{% endblock %}
+
+{% block content %}
+    <h1>Order {{ order.id }}</h1>
+
+    <div class="card">
+        <p><strong>Description:</strong> {{ order.short_description }}</p>
+        <p><strong>User:</strong> {{ order.user.name }} ({{ order.user.email }})</p>
+        <p><strong>Order type:</strong> {{ order.get_order_type_display }}</p>
+        <p><strong>Status:</strong> {{ order.get_status_display }}</p>
+        <p><strong>Store:</strong> {{ order.store }}</p>
+        <p><strong>Article number:</strong> {{ order.article_number|default:"-" }}</p>
+        <p><strong>Quantity:</strong> {{ order.quantity }}</p>
+        <p><strong>URL:</strong>
+            {% if order.url %}
+                <a href="{{ order.url }}" target="_blank" rel="noopener noreferrer">{{ order.url }}</a>
+            {% else %}
+                -
+            {% endif %}
+        </p>
+        <p><strong>Total price excl. VAT:</strong> {{ order.total_price_excl_vat|default:"-" }}</p>
+        <p><strong>Delivery time in days:</strong> {{ order.delivery_time_days|default:"-" }}</p>
+        <p><strong>Purchase request number:</strong> {{ order.purchase_request_number|default:"-" }}</p>
+        <p><strong>Created at:</strong> {{ order.created_at|date:"Y-m-d H:i" }}</p>
+    </div>
+
+    <div class="card">
+        <h2>Remarks</h2>
+        <p><strong>Student remarks:</strong><br>{{ order.student_remarks|default:"-" }}</p>
+        <p><strong>Teacher remarks:</strong><br>{{ order.teacher_remarks|default:"-" }}</p>
+    </div>
+
+    <div class="card">
+        <h2>Dates</h2>
+        <p><strong>Finance order date:</strong> {{ order.finance_order_date|default:"-" }}</p>
+        <p><strong>Shipped date:</strong> {{ order.shipped_date|default:"-" }}</p>
+        <p><strong>Received date:</strong> {{ order.received_date|default:"-" }}</p>
+    </div>
+
+    <div class="card">
+        <h2>Decision</h2>
+        <p><strong>Decision reason:</strong><br>{{ order.decision_reason|default:"-" }}</p>
+        <p>
+            <strong>Decided by:</strong>
+            {% if order.decided_by %}
+                {{ order.decided_by.name }} ({{ order.decided_by.email }})
+            {% else %}
+                -
+            {% endif %}
+        </p>
+        <p><strong>Decided at:</strong> {{ order.decided_at|default:"-" }}</p>
+    </div>
+
+    <p>
+        <a href="{% url 'orders:order_list' %}">Back to orders</a>
+    </p>
+{% endblock %}
