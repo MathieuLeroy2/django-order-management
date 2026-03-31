@@ -27,6 +27,9 @@ class OrderBaseForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         self.user = user
 
+        if self.user and self.user.role == "student":
+            self.fields.pop("teacher_remarks", None)
+
 
 class OrderCreateForm(OrderBaseForm):
     pass

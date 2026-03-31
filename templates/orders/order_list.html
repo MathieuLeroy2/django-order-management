@@ -165,6 +165,7 @@
                             <form method="post">
                                 {% csrf_token %}
                                 <input type="hidden" name="update_order_id" value="{{ order.id }}">
+                                <input type="hidden" name="return_query" value="{{ request.GET.urlencode }}">
                                 <select name="decision">
                                     <option value="submitted" {% if order.status == "submitted" %}selected{% endif %}>Submitted</option>
                                     <option value="approved" {% if order.status == "approved" %}selected{% endif %}>Approved</option>

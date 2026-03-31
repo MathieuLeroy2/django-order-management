@@ -7,6 +7,7 @@ from django.utils import timezone
 
 from .forms import OrderCreateForm, OrderDecisionForm, OrderEditForm
 from .models import Order
+from django.urls import reverse
 
 
 def get_visible_orders_for_user(user):
@@ -91,7 +92,14 @@ def order_list(request):
             order.decided_at = timezone.now()
             order.save()
             messages.success(request, f"Order {order.id} was updated successfully.")
-            return redirect("orders:order_list")
+
+            query_string = request.POST.get("return_query", "").strip()
+            redirect_url = reverse("orders:order_list")
+
+            if query_string:
+                redirect_url = f"{redirect_url}?{query_string}"
+
+            return redirect(redirect_url)
         else:
             messages.error(request, "Could not update the order. Please check the form.")
 
