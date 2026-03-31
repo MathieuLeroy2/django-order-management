@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block title %}Create Order{% endblock %}
+
+{% block content %}
+    <h1>Create Order</h1>
+
+    <div class="card">
+        <form method="post">
+            {% csrf_token %}
+
+            {{ form.non_field_errors }}
+
+            {% for field in form %}
+                <p>
+                    {{ field.label_tag }}<br>
+                    {{ field }}
+                    {% if field.errors %}
+                        <br>
+                        <span style="color: red;">{{ field.errors }}</span>
+                    {% endif %}
+                </p>
+            {% endfor %}
+
+            <button type="submit">Create order</button>
+        </form>
+    </div>
+
+    <p>
+        <a href="{% url 'orders:order_list' %}">Back to orders</a>
+    </p>
+{% endblock %}

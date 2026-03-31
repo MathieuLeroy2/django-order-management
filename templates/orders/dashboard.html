@@ -16,18 +16,21 @@
             <h2>Admin dashboard</h2>
             <p>You can manage all orders and all users.</p>
             <p><a href="{% url 'orders:order_list' %}">View all orders</a></p>
+            <p><a href="{% url 'orders:order_create' %}">Create a new order</a></p>
         </div>
     {% elif user.role == "teacher" %}
         <div class="card">
             <h2>Teacher dashboard</h2>
             <p>You can create your own orders and approve student orders and your own teacher orders.</p>
             <p><a href="{% url 'orders:order_list' %}">View my orders</a></p>
+            <p><a href="{% url 'orders:order_create' %}">Create a new order</a></p>
         </div>
     {% elif user.role == "student" %}
         <div class="card">
             <h2>Student dashboard</h2>
             <p>You can create your own orders and follow their status.</p>
             <p><a href="{% url 'orders:order_list' %}">View my orders</a></p>
+            <p><a href="{% url 'orders:order_create' %}">Create a new order</a></p>
         </div>
     {% endif %}
 {% endblock %}

@@ -5,6 +5,10 @@
 {% block content %}
     <h1>Orders</h1>
 
+    <p>
+        <a href="{% url 'orders:order_create' %}">Create a new order</a>
+    </p>
+
     {% if orders %}
         <table border="1" cellpadding="8" cellspacing="0" style="border-collapse: collapse; width: 100%;">
             <thead>

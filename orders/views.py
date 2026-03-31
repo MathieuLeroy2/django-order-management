@@ -1,6 +1,9 @@
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.http import Http404
-from django.shortcuts import get_object_or_404, render
+from django.shortcuts import get_object_or_404, redirect, render
+
+from .forms import OrderCreateForm
 from .models import Order
 
 
@@ -53,3 +56,32 @@ def order_detail(request, order_id):
         "order": order,
     }
     return render(request, "orders/order_detail.html", context)
+
+
+@login_required
+def order_create(request):
+    if request.method == "POST":
+        form = OrderCreateForm(request.POST, user=request.user)
+        if form.is_valid():
+            order = form.save(commit=False)
+            order.user = request.user
+            order.status = Order.STATUS_SUBMITTED
+
+            if request.user.role == "student":
+                order.order_type = Order.ORDER_TYPE_STUDENT
+            elif request.user.role == "teacher":
+                order.order_type = Order.ORDER_TYPE_TEACHER
+            else:
+                order.order_type = Order.ORDER_TYPE_TEACHER
+
+            order.save()
+
+            messages.success(request, f"Order {order.id} was created successfully.")
+            return redirect("orders:order_detail", order_id=order.id)
+    else:
+        form = OrderCreateForm(user=request.user)
+
+    context = {
+        "form": form,
+    }
+    return render(request, "orders/order_form.html", context)
