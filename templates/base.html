@@ -1,113 +1,47 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Order Management{% endblock %}</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0 auto;
-            padding: 20px;
-        }
-
-        main {
-            width: 100%;
-        }
-
-        nav {
-            margin-bottom: 20px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid #ccc;
-        }
-
-        nav a {
-            margin-right: 15px;
-            text-decoration: none;
-        }
-
-        .message {
-            padding: 10px;
-            margin-bottom: 10px;
-            border: 1px solid #ccc;
-            background: #f5f5f5;
-        }
-
-        .card {
-            border: 1px solid #ddd;
-            padding: 16px;
-            margin-bottom: 16px;
-            border-radius: 6px;
-        }
-        .order-table-wrapper {
-            width: 100%;
-            overflow-x: auto;
-        }
-
-        .order-table {
-            width: 100%;
-            border-collapse: collapse;
-            table-layout: auto;
-        }
-
-        .order-table th,
-        .order-table td {
-            border: 1px solid #ccc;
-            padding: 8px;
-            vertical-align: top;
-            white-space: nowrap;
-        }
-
-        .order-table th {
-            background: #f5f5f5;
-            text-align: left;
-        }
-
-        .order-table td.wrap,
-        .order-table td.wrap a {
-            white-space: normal;
-            word-break: break-word;
-        }
-
-        .order-table textarea,
-        .order-table select,
-        .order-table button {
-            max-width: 100%;
-            box-sizing: border-box;
-        }
-
-        .order-table textarea {
-            width: 100%;
-            resize: vertical;
-        }
-    </style>
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
 </head>
 <body>
-    <nav>
+    <div class="topbar">
         {% if user.is_authenticated %}
-            <strong>Logged in as:</strong> {{ user.name }} ({{ user.role }})
-            |
-            <a href="{% url 'orders:dashboard' %}">Dashboard</a>
-            <a href="{% url 'orders:order_list' %}">Orders</a>
-            <a href="{% url 'orders:order_create' %}">Create order</a>
-            <a href="/admin/">Admin</a>
-            <form action="{% url 'logout' %}" method="post" style="display:inline;">
+            <div><strong>Logged in as:</strong> {{ user.name }} ({{ user.role }})</div>
+
+            <div class="nav-links">
+                <a href="{% url 'orders:dashboard' %}">Dashboard</a>
+                <a href="{% url 'orders:order_list' %}">Orders</a>
+                <a href="{% url 'orders:order_create' %}">Create order</a>
+                {% if user.is_staff %}
+                    <a href="/admin/">Admin</a>
+                {% endif %}
+            </div>
+
+            <form method="post" action="{% url 'logout' %}">
                 {% csrf_token %}
                 <button type="submit">Logout</button>
             </form>
         {% else %}
-            <a href="{% url 'login' %}">Login</a>
-        {% endif %}
-    </nav>
-
-    {% if messages %}
-        {% for message in messages %}
-            <div class="message">
-                {{ message }}
+            <div class="nav-links">
+                <a href="{% url 'login' %}">Login</a>
             </div>
-        {% endfor %}
-    {% endif %}
+        {% endif %}
+    </div>
 
-    {% block content %}{% endblock %}
+    <div class="page">
+        {% if messages %}
+            <div class="messages">
+                {% for message in messages %}
+                    <div class="message">{{ message }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        {% block content %}{% endblock %}
+    </div>
 </body>
 </html>
