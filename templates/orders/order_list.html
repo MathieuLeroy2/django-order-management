@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block title %}Orders{% endblock %}
+
+{% block content %}
+    <h1>Orders</h1>
+
+    {% if orders %}
+        <table border="1" cellpadding="8" cellspacing="0" style="border-collapse: collapse; width: 100%;">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Description</th>
+                    <th>User</th>
+                    <th>Type</th>
+                    <th>Status</th>
+                    <th>Store</th>
+                    <th>Quantity</th>
+                    <th>Created</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for order in orders %}
+                    <tr>
+                        <td>{{ order.id }}</td>
+                        <td>{{ order.short_description }}</td>
+                        <td>{{ order.user.name }}</td>
+                        <td>{{ order.get_order_type_display }}</td>
+                        <td>{{ order.get_status_display }}</td>
+                        <td>{{ order.store }}</td>
+                        <td>{{ order.quantity }}</td>
+                        <td>{{ order.created_at|date:"Y-m-d H:i" }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <div class="card">
+            <p>No orders found.</p>
+        </div>
+    {% endif %}
+{% endblock %}
