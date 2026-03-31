@@ -2,121 +2,12 @@
 {% block title %}Orders{% endblock %}
 
 {% block content %}
-<div class="page-header">
-    <h1>Orders</h1>
-    <p><a href="{% url 'orders:order_create' %}">Create a new order</a></p>
-</div>
+<h1>Orders</h1>
 
-<div class="filters-card">
-    <form method="get">
-        <div class="filters-grid">
-            <div class="filter-field">
-                <label for="id_search">Search</label>
-                <input type="text" name="search" id="id_search" value="{{ search }}">
-            </div>
+<p><a href="{% url 'orders:order_create' %}">Create a new order</a></p>
 
-            <div class="filter-field">
-                <label for="id_status">Status</label>
-                <select name="status" id="id_status">
-                    <option value="">All</option>
-                    {% for value, label in status_choices %}
-                        <option value="{{ value }}" {% if status_filter == value %}selected{% endif %}>{{ label }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-
-            <div class="filter-field">
-                <label for="id_store">Store</label>
-                <input type="text" name="store" id="id_store" value="{{ store_filter }}">
-            </div>
-
-            <div class="filter-field">
-                <label for="id_ordernumber">Order number</label>
-                <input type="text" name="ordernumber" id="id_ordernumber" value="{{ ordernumber_filter }}">
-            </div>
-
-            <div class="filter-field">
-                <label for="id_finance_order_date_filter">Finance order date</label>
-                <select name="finance_order_date_filter" id="id_finance_order_date_filter">
-                    <option value="">All</option>
-                    <option value="empty" {% if finance_order_date_filter == "empty" %}selected{% endif %}>Empty</option>
-                    <option value="filled" {% if finance_order_date_filter == "filled" %}selected{% endif %}>Filled</option>
-                </select>
-            </div>
-
-            <div class="filter-field">
-                <label for="id_shipped_date_filter">Shipped date</label>
-                <select name="shipped_date_filter" id="id_shipped_date_filter">
-                    <option value="">All</option>
-                    <option value="empty" {% if shipped_date_filter == "empty" %}selected{% endif %}>Empty</option>
-                    <option value="filled" {% if shipped_date_filter == "filled" %}selected{% endif %}>Filled</option>
-                </select>
-            </div>
-
-            <div class="filter-field">
-                <label for="id_received_date_filter">Received date</label>
-                <select name="received_date_filter" id="id_received_date_filter">
-                    <option value="">All</option>
-                    <option value="empty" {% if received_date_filter == "empty" %}selected{% endif %}>Empty</option>
-                    <option value="filled" {% if received_date_filter == "filled" %}selected{% endif %}>Filled</option>
-                </select>
-            </div>
-
-            <div class="filter-field">
-                <label for="id_primary_sort">Primary sort</label>
-                <select name="primary_sort" id="id_primary_sort">
-                    <option value="store" {% if primary_sort == "store" %}selected{% endif %}>Store A-Z</option>
-                    <option value="-store" {% if primary_sort == "-store" %}selected{% endif %}>Store Z-A</option>
-                    <option value="ordernumber" {% if primary_sort == "ordernumber" %}selected{% endif %}>Order number A-Z</option>
-                    <option value="-ordernumber" {% if primary_sort == "-ordernumber" %}selected{% endif %}>Order number Z-A</option>
-                    <option value="-created_at" {% if primary_sort == "-created_at" %}selected{% endif %}>Newest first</option>
-                    <option value="created_at" {% if primary_sort == "created_at" %}selected{% endif %}>Oldest first</option>
-                    <option value="status" {% if primary_sort == "status" %}selected{% endif %}>Status A-Z</option>
-                    <option value="-status" {% if primary_sort == "-status" %}selected{% endif %}>Status Z-A</option>
-                    <option value="quantity" {% if primary_sort == "quantity" %}selected{% endif %}>Quantity low-high</option>
-                    <option value="-quantity" {% if primary_sort == "-quantity" %}selected{% endif %}>Quantity high-low</option>
-                    <option value="total_price_excl_vat" {% if primary_sort == "total_price_excl_vat" %}selected{% endif %}>Price low-high</option>
-                    <option value="-total_price_excl_vat" {% if primary_sort == "-total_price_excl_vat" %}selected{% endif %}>Price high-low</option>
-                    <option value="finance_order_date" {% if primary_sort == "finance_order_date" %}selected{% endif %}>Finance date oldest</option>
-                    <option value="-finance_order_date" {% if primary_sort == "-finance_order_date" %}selected{% endif %}>Finance date newest</option>
-                    <option value="user__name" {% if primary_sort == "user__name" %}selected{% endif %}>User A-Z</option>
-                    <option value="-user__name" {% if primary_sort == "-user__name" %}selected{% endif %}>User Z-A</option>
-                </select>
-            </div>
-
-            <div class="filter-field">
-                <label for="id_secondary_sort">Secondary sort</label>
-                <select name="secondary_sort" id="id_secondary_sort">
-                    <option value="-created_at" {% if secondary_sort == "-created_at" %}selected{% endif %}>Newest first</option>
-                    <option value="created_at" {% if secondary_sort == "created_at" %}selected{% endif %}>Oldest first</option>
-                    <option value="store" {% if secondary_sort == "store" %}selected{% endif %}>Store A-Z</option>
-                    <option value="-store" {% if secondary_sort == "-store" %}selected{% endif %}>Store Z-A</option>
-                    <option value="ordernumber" {% if secondary_sort == "ordernumber" %}selected{% endif %}>Order number A-Z</option>
-                    <option value="-ordernumber" {% if secondary_sort == "-ordernumber" %}selected{% endif %}>Order number Z-A</option>
-                    <option value="status" {% if secondary_sort == "status" %}selected{% endif %}>Status A-Z</option>
-                    <option value="-status" {% if secondary_sort == "-status" %}selected{% endif %}>Status Z-A</option>
-                    <option value="quantity" {% if secondary_sort == "quantity" %}selected{% endif %}>Quantity low-high</option>
-                    <option value="-quantity" {% if secondary_sort == "-quantity" %}selected{% endif %}>Quantity high-low</option>
-                    <option value="total_price_excl_vat" {% if secondary_sort == "total_price_excl_vat" %}selected{% endif %}>Price low-high</option>
-                    <option value="-total_price_excl_vat" {% if secondary_sort == "-total_price_excl_vat" %}selected{% endif %}>Price high-low</option>
-                    <option value="finance_order_date" {% if secondary_sort == "finance_order_date" %}selected{% endif %}>Finance date oldest</option>
-                    <option value="-finance_order_date" {% if secondary_sort == "-finance_order_date" %}selected{% endif %}>Finance date newest</option>
-                    <option value="user__name" {% if secondary_sort == "user__name" %}selected{% endif %}>User A-Z</option>
-                    <option value="-user__name" {% if secondary_sort == "-user__name" %}selected{% endif %}>User Z-A</option>
-                </select>
-            </div>
-        </div>
-
-        <div class="filter-actions">
-            <button type="submit">Apply</button>
-            <a href="{% url 'orders:order_list' %}">Reset</a>
-        </div>
-    </form>
-</div>
-
-<div class="table-card">
-    {% if orders %}
-    <table class="orders-table">
+<form method="get">
+    <table>
         <thead>
             <tr>
                 <th>ID</th>
@@ -138,6 +29,90 @@
                 <th>Created</th>
                 <th>Actions</th>
             </tr>
+            <tr>
+                <th></th>
+                <th><input type="text" name="search" value="{{ search }}" placeholder="Search"></th>
+                <th></th>
+                <th><input type="text" name="store" value="{{ store_filter }}" placeholder="Store"></th>
+                <th><input type="text" name="ordernumber" value="{{ ordernumber_filter }}" placeholder="Exact"></th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th>
+                    <select name="status">
+                        <option value="">All</option>
+                        {% for value, label in status_choices %}
+                            <option value="{{ value }}" {% if status_filter == value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th>
+                    <select name="finance_order_date_filter">
+                        <option value="">Finance</option>
+                        <option value="empty" {% if finance_order_date_filter == "empty" %}selected{% endif %}>Empty</option>
+                        <option value="filled" {% if finance_order_date_filter == "filled" %}selected{% endif %}>Filled</option>
+                    </select>
+                    <select name="shipped_date_filter">
+                        <option value="">Shipped</option>
+                        <option value="empty" {% if shipped_date_filter == "empty" %}selected{% endif %}>Empty</option>
+                        <option value="filled" {% if shipped_date_filter == "filled" %}selected{% endif %}>Filled</option>
+                    </select>
+                    <select name="received_date_filter">
+                        <option value="">Received</option>
+                        <option value="empty" {% if received_date_filter == "empty" %}selected{% endif %}>Empty</option>
+                        <option value="filled" {% if received_date_filter == "filled" %}selected{% endif %}>Filled</option>
+                    </select>
+                </th>
+                <th>
+                    <select name="primary_sort">
+                        <option value="store" {% if primary_sort == "store" %}selected{% endif %}>Store A-Z</option>
+                        <option value="-store" {% if primary_sort == "-store" %}selected{% endif %}>Store Z-A</option>
+                        <option value="ordernumber" {% if primary_sort == "ordernumber" %}selected{% endif %}>Order nr A-Z</option>
+                        <option value="-ordernumber" {% if primary_sort == "-ordernumber" %}selected{% endif %}>Order nr Z-A</option>
+                        <option value="-created_at" {% if primary_sort == "-created_at" %}selected{% endif %}>Newest first</option>
+                        <option value="created_at" {% if primary_sort == "created_at" %}selected{% endif %}>Oldest first</option>
+                        <option value="status" {% if primary_sort == "status" %}selected{% endif %}>Status A-Z</option>
+                        <option value="-status" {% if primary_sort == "-status" %}selected{% endif %}>Status Z-A</option>
+                        <option value="quantity" {% if primary_sort == "quantity" %}selected{% endif %}>Quantity low-high</option>
+                        <option value="-quantity" {% if primary_sort == "-quantity" %}selected{% endif %}>Quantity high-low</option>
+                        <option value="total_price_excl_vat" {% if primary_sort == "total_price_excl_vat" %}selected{% endif %}>Price low-high</option>
+                        <option value="-total_price_excl_vat" {% if primary_sort == "-total_price_excl_vat" %}selected{% endif %}>Price high-low</option>
+                        <option value="finance_order_date" {% if primary_sort == "finance_order_date" %}selected{% endif %}>Finance oldest</option>
+                        <option value="-finance_order_date" {% if primary_sort == "-finance_order_date" %}selected{% endif %}>Finance newest</option>
+                        <option value="user__name" {% if primary_sort == "user__name" %}selected{% endif %}>User A-Z</option>
+                        <option value="-user__name" {% if primary_sort == "-user__name" %}selected{% endif %}>User Z-A</option>
+                    </select>
+
+                    <select name="secondary_sort">
+                        <option value="-created_at" {% if secondary_sort == "-created_at" %}selected{% endif %}>2nd: Newest</option>
+                        <option value="created_at" {% if secondary_sort == "created_at" %}selected{% endif %}>2nd: Oldest</option>
+                        <option value="store" {% if secondary_sort == "store" %}selected{% endif %}>2nd: Store A-Z</option>
+                        <option value="-store" {% if secondary_sort == "-store" %}selected{% endif %}>2nd: Store Z-A</option>
+                        <option value="ordernumber" {% if secondary_sort == "ordernumber" %}selected{% endif %}>2nd: Order nr A-Z</option>
+                        <option value="-ordernumber" {% if secondary_sort == "-ordernumber" %}selected{% endif %}>2nd: Order nr Z-A</option>
+                        <option value="status" {% if secondary_sort == "status" %}selected{% endif %}>2nd: Status A-Z</option>
+                        <option value="-status" {% if secondary_sort == "-status" %}selected{% endif %}>2nd: Status Z-A</option>
+                        <option value="quantity" {% if secondary_sort == "quantity" %}selected{% endif %}>2nd: Quantity low-high</option>
+                        <option value="-quantity" {% if secondary_sort == "-quantity" %}selected{% endif %}>2nd: Quantity high-low</option>
+                        <option value="total_price_excl_vat" {% if secondary_sort == "total_price_excl_vat" %}selected{% endif %}>2nd: Price low-high</option>
+                        <option value="-total_price_excl_vat" {% if secondary_sort == "-total_price_excl_vat" %}selected{% endif %}>2nd: Price high-low</option>
+                        <option value="finance_order_date" {% if secondary_sort == "finance_order_date" %}selected{% endif %}>2nd: Finance oldest</option>
+                        <option value="-finance_order_date" {% if secondary_sort == "-finance_order_date" %}selected{% endif %}>2nd: Finance newest</option>
+                        <option value="user__name" {% if secondary_sort == "user__name" %}selected{% endif %}>2nd: User A-Z</option>
+                        <option value="-user__name" {% if secondary_sort == "-user__name" %}selected{% endif %}>2nd: User Z-A</option>
+                    </select>
+
+                    <button type="submit">Apply</button>
+                    <a href="{% url 'orders:order_list' %}">Reset</a>
+                </th>
+            </tr>
         </thead>
         <tbody>
             {% for order in orders %}
@@ -149,11 +124,11 @@
                 <td>{{ order.ordernumber|default:"-" }}</td>
                 <td>{{ order.article_number|default:"-" }}</td>
                 <td>{{ order.quantity }}</td>
-                <td class="compact-link">
+                <td>
                     {% if order.url %}
                         <a href="{{ order.url }}" target="_blank">Link</a>
                     {% else %}
-                        <span class="muted">-</span>
+                        -
                     {% endif %}
                 </td>
                 <td>{{ order.total_price_excl_vat|default:"-" }}</td>
@@ -166,21 +141,21 @@
                     {% if order.decided_by %}
                         {{ order.decided_by.name }}
                     {% else %}
-                        <span class="muted">-</span>
+                        -
                     {% endif %}
                 </td>
                 <td>
                     {% if order.decided_at %}
                         {{ order.decided_at|date:"Y-m-d H:i" }}
                     {% else %}
-                        <span class="muted">-</span>
+                        -
                     {% endif %}
                 </td>
                 <td>{{ order.created_at|date:"Y-m-d H:i" }}</td>
                 <td>
                     {% if user.role == "admin" or user.role == "teacher" %}
                         {% if user.role == "admin" or order.order_type == "student_order" or order.user_id == user.id %}
-                            <form method="post" class="inline-decision-form">
+                            <form method="post">
                                 {% csrf_token %}
                                 <input type="hidden" name="update_order_id" value="{{ order.id }}">
                                 <select name="decision">
@@ -193,22 +168,23 @@
                                 <button type="submit">Update</button>
                             </form>
                         {% else %}
-                            <span class="muted">-</span>
+                            -
                         {% endif %}
                     {% else %}
                         {% if order.user_id == user.id and order.status != "approved" and order.status != "rejected" %}
                             <a href="{% url 'orders:order_edit' order.id %}">Edit</a>
                         {% else %}
-                            <span class="muted">-</span>
+                            -
                         {% endif %}
                     {% endif %}
                 </td>
             </tr>
+            {% empty %}
+            <tr>
+                <td colspan="18">No orders found.</td>
+            </tr>
             {% endfor %}
         </tbody>
     </table>
-    {% else %}
-        <p>No orders found.</p>
-    {% endif %}
-</div>
+</form>
 {% endblock %}

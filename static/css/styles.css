@@ -74,16 +74,15 @@ body {
     margin-bottom: 6px;
 }
 
-.filter-field input,
-.filter-field select,
-.filter-field textarea,
-button {
+input, select, textarea, button {
+    margin: 2px 0;
     width: 100%;
     box-sizing: border-box;
-    padding: 8px 10px;
-    border: 1px solid #cbd5e1;
-    border-radius: 6px;
-    background: #fff;
+}
+
+th input,
+th select {
+    min-width: 90px;
 }
 
 .filter-actions {
