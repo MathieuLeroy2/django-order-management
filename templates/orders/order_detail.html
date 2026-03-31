@@ -54,6 +54,10 @@
     </div>
 
     <p>
+        {% if can_edit %}
+            <a href="{% url 'orders:order_edit' order.id %}">Edit this order</a>
+            |
+        {% endif %}
         <a href="{% url 'orders:order_list' %}">Back to orders</a>
     </p>
 {% endblock %}

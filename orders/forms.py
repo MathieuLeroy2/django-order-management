@@ -2,7 +2,7 @@ from django import forms
 from .models import Order
 
 
-class OrderCreateForm(forms.ModelForm):
+class OrderBaseForm(forms.ModelForm):
     class Meta:
         model = Order
         fields = [
@@ -25,3 +25,11 @@ class OrderCreateForm(forms.ModelForm):
     def __init__(self, *args, user=None, **kwargs):
         super().__init__(*args, **kwargs)
         self.user = user
+
+
+class OrderCreateForm(OrderBaseForm):
+    pass
+
+
+class OrderEditForm(OrderBaseForm):
+    pass

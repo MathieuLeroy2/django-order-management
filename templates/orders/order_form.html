@@ -1,9 +1,9 @@
 {% extends "base.html" %}
 
-{% block title %}Create Order{% endblock %}
+{% block title %}{{ page_title }}{% endblock %}
 
 {% block content %}
-    <h1>Create Order</h1>
+    <h1>{{ page_title }}</h1>
 
     <div class="card">
         <form method="post">
@@ -22,7 +22,7 @@
                 </p>
             {% endfor %}
 
-            <button type="submit">Create order</button>
+            <button type="submit">{{ submit_label }}</button>
         </form>
     </div>
 
