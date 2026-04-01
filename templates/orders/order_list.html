@@ -16,6 +16,10 @@
     <a href="{% url 'orders:order_create' %}">Create a new order</a>
 </p>
 
+<p>
+    <a href="{% url 'orders:store_overview' %}">View whitelisted and blacklisted stores</a>
+</p>
+
 <hr>
 
 <h2>Totals</h2>
@@ -224,6 +228,7 @@
             <th>Finance order date</th>
             <th>Shipped date</th>
             <th>Received date</th>
+            <th>Created at</th>
         </tr>
     </thead>
     <tbody>
@@ -236,7 +241,15 @@
                     {{ order.store }}
                 </td>
                 <td>
-                    <a href="{% url 'orders:order_edit' order.id %}">{{ order.short_description }}</a>
+                    {% if request.user.role == 'admin' %}
+                        <a href="{% url 'orders:order_edit' order.id %}">
+                            {{ order.short_description }}
+                        </a>
+                    {% else %}
+                        <a href="{% url 'orders:order_detail' order.id %}">
+                            {{ order.short_description }}
+                        </a>
+                    {% endif %}
                 </td>
                 <td>{{ order.article_number|default:"-" }}</td>
                 <td>
@@ -287,6 +300,8 @@
                         <td>
                             <input type="date" name="received_date" value="{% if order.received_date %}{{ order.received_date|date:'Y-m-d' }}{% endif %}">
                         </td>
+
+                        <td>{{ order.created_at|date:"Y-m-d H:i" }}</td>
                     </form>
                 {% else %}
                     <td>{{ order.teacher_remarks|default:"-" }}</td>
@@ -348,11 +363,12 @@
                             -
                         {% endif %}
                     </td>
+                    <td>{{ order.created_at|date:"Y-m-d H:i" }}</td>
                 {% endif %}
             </tr>
         {% empty %}
             <tr>
-                <td colspan="16">No orders found.</td>
+                <td colspan="17">No orders found.</td>
             </tr>
         {% endfor %}
     </tbody>

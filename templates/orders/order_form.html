@@ -5,6 +5,8 @@
 {% block content %}
     <h1>{{ page_title }}</h1>
 
+    Created at: {{ order.created_at|date:"Y-m-d H:i" }}
+
     <div class="card">
         <style>
             .form-container {
