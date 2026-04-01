@@ -1,0 +1,18 @@
+services:
+  web:
+    build: .
+    container_name: django-order-management
+    ports:
+      - "80:8000"
+    environment:
+      DJANGO_DEBUG: "False"
+      DJANGO_SECRET_KEY: "replace-this-with-a-long-random-secret"
+      DJANGO_ALLOWED_HOSTS: "localhost,127.0.0.1"
+      DJANGO_CSRF_TRUSTED_ORIGINS: "http://localhost:8000"
+      DJANGO_SQLITE_PATH: "/data/db.sqlite3"
+    volumes:
+      - django_order_data:/data
+    restart: unless-stopped
+
+volumes:
+  django_order_data:
