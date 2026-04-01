@@ -68,7 +68,9 @@
             <a href="{% url 'orders:dashboard' %}">Dashboard</a>
             <a href="{% url 'orders:order_list' %}">Orders</a>
             <a href="{% url 'orders:order_create' %}">Create order</a>
+            <a href="{% url 'orders:store_overview' %}">View stores</a>
             <a href="/admin/">Admin</a>
+
 
             <form method="post" action="{% url 'logout' %}">
                 {% csrf_token %}

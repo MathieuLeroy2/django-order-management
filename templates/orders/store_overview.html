@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+
+{% block title %}Store Overview{% endblock %}
+
+{% block content %}
+<style>
+    .store-overview-page {
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+    .store-overview-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem;
+        align-items: start;
+    }
+
+    .store-card {
+        border: 1px solid #ddd;
+        border-radius: 10px;
+        padding: 1rem 1.25rem;
+        background: #fff;
+    }
+
+    .store-card h2 {
+        margin-top: 0;
+        margin-bottom: 1rem;
+    }
+
+    .store-list {
+        margin: 0;
+        padding-left: 1.25rem;
+    }
+
+    .store-list li {
+        margin-bottom: 0.4rem;
+    }
+
+    .empty-message {
+        color: #666;
+        font-style: italic;
+    }
+
+    .blacklist-title {
+        color: #a94442;
+    }
+
+    .whitelist-title {
+        color: #2e6f40;
+    }
+
+    .page-actions {
+        margin-top: 1.5rem;
+    }
+
+    @media (max-width: 800px) {
+        .store-overview-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<div class="store-overview-page">
+    <h1>Store Overview</h1>
+    <p>
+        This page shows which stores are currently whitelisted and which stores are blacklisted.
+    </p>
+
+    <div class="store-overview-grid">
+        <div class="store-card">
+            <h2 class="whitelist-title">Whitelisted stores</h2>
+
+            {% if whitelisted_stores %}
+                <ul class="store-list">
+                    {% for store in whitelisted_stores %}
+                        <li>{{ store.store_name }}</li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p class="empty-message">No whitelisted stores have been added yet.</p>
+            {% endif %}
+        </div>
+
+        <div class="store-card">
+            <h2 class="blacklist-title">Blacklisted stores</h2>
+
+            {% if blacklisted_stores %}
+                <ul class="store-list">
+                    {% for store in blacklisted_stores %}
+                        <li>{{ store.store_name }}</li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p class="empty-message">No blacklisted stores have been added yet.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="page-actions">
+        <a href="{% url 'orders:order_list' %}">Back to orders</a>
+    </div>
+</div>
+{% endblock %}

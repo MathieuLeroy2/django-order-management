@@ -125,6 +125,21 @@ def dashboard(request):
     }
     return render(request, "orders/dashboard.html", context)
 
+@login_required
+def store_overview(request):
+    whitelisted_stores = StoreRule.objects.filter(
+        list_type=StoreRule.LIST_TYPE_WHITELIST
+    ).order_by("store_name")
+
+    blacklisted_stores = StoreRule.objects.filter(
+        list_type=StoreRule.LIST_TYPE_BLACKLIST
+    ).order_by("store_name")
+
+    context = {
+        "whitelisted_stores": whitelisted_stores,
+        "blacklisted_stores": blacklisted_stores,
+    }
+    return render(request, "orders/store_overview.html", context)
 
 @login_required
 def order_list(request):
