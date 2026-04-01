@@ -3,66 +3,240 @@
 {% block title %}Order {{ order.id }}{% endblock %}
 
 {% block content %}
-    <h1>Order {{ order.id }}</h1>
+<style>
+    .order-detail-page {
+        width: 100%;
+        max-width: 1400px;
+        margin: 0 auto;
+    }
 
-    <div class="card">
-        <p><strong>Description:</strong> {{ order.short_description }}</p>
-        <p><strong>User:</strong> {{ order.user.name }} ({{ order.user.email }})</p>
-        <p><strong>Order type:</strong> {{ order.get_order_type_display }}</p>
-        <p><strong>Status:</strong> {{ order.get_status_display }}</p>
-        <p><strong>Store:</strong> {{ order.store }}</p>
-        <p><strong>Article number:</strong> {{ order.article_number|default:"-" }}</p>
-        <p><strong>Order number:</strong> {{ order.ordernumber|default:"-" }}</p>
-        <p><strong>Quantity:</strong> {{ order.quantity }}</p>
-        <p><strong>URL:</strong>
-            {% if order.url %}
-                <a href="{{ order.url }}" target="_blank" rel="noopener noreferrer">{{ order.url }}</a>
-            {% else %}
-                -
-            {% endif %}
-        </p>
-        <p><strong>Total price excl. VAT:</strong> {{ order.total_price_excl_vat|default:"-" }}</p>
-        <p><strong>Delivery time in days:</strong> {{ order.delivery_time_days|default:"-" }}</p>
-        <p><strong>Purchase request number:</strong> {{ order.purchase_request_number|default:"-" }}</p>
-        <p><strong>Created at:</strong> {{ order.created_at|date:"Y-m-d H:i" }}</p>
+    .order-detail-header {
+        margin-bottom: 1.5rem;
+    }
+
+    .order-detail-title {
+        margin-bottom: 0.5rem;
+    }
+
+    .order-detail-meta {
+        color: #555;
+        font-size: 0.95rem;
+    }
+
+    .order-detail-grid {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 1.5rem;
+        align-items: start;
+    }
+
+    .order-card {
+        border: 1px solid #ddd;
+        border-radius: 10px;
+        padding: 1rem 1.25rem;
+        background: #fff;
+        box-sizing: border-box;
+    }
+
+    .order-card h2 {
+        margin-top: 0;
+        margin-bottom: 1rem;
+        font-size: 1.1rem;
+    }
+
+    .order-fields {
+        display: grid;
+        grid-template-columns: minmax(180px, 220px) 1fr;
+        gap: 0.75rem 1rem;
+    }
+
+    .order-label {
+        font-weight: 600;
+    }
+
+    .order-value {
+        overflow-wrap: anywhere;
+        word-break: break-word;
+    }
+
+    .order-remarks {
+        display: grid;
+        gap: 1rem;
+    }
+
+    .remark-box {
+        border: 1px solid #e3e3e3;
+        border-radius: 8px;
+        padding: 0.75rem 1rem;
+        background: #fafafa;
+    }
+
+    .remark-box h3 {
+        margin-top: 0;
+        margin-bottom: 0.5rem;
+        font-size: 1rem;
+    }
+
+    .order-actions {
+        margin-top: 1.5rem;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+    }
+
+    .order-actions a {
+        display: inline-block;
+    }
+
+    @media (max-width: 900px) {
+        .order-detail-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    @media (max-width: 640px) {
+        .order-fields {
+            grid-template-columns: 1fr;
+        }
+
+        .order-label {
+            margin-bottom: -0.35rem;
+        }
+    }
+</style>
+
+<div class="order-detail-page">
+    <div class="order-detail-header">
+        <h1 class="order-detail-title">Order {{ order.id }}</h1>
+        <div class="order-detail-meta">
+            Created at: {{ order.created_at|date:"Y-m-d H:i" }}
+        </div>
     </div>
 
-    <div class="card">
-        <h2>Remarks</h2>
-        <p><strong>Student remarks:</strong><br>{{ order.student_remarks|default:"-" }}</p>
-        <p><strong>Teacher remarks:</strong><br>{{ order.teacher_remarks|default:"-" }}</p>
+    <div class="order-detail-grid">
+        <div class="order-card">
+            <h2>Order information</h2>
+
+            <div class="order-fields">
+                <div class="order-label">User</div>
+                <div class="order-value">{{ order.user.name }} ({{ order.user.email }})</div>
+
+                <div class="order-label">Status</div>
+                <div class="order-value">{{ order.get_status_display }}</div>
+
+                <div class="order-label">Quantity</div>
+                <div class="order-value">{{ order.quantity }}</div>
+
+                <div class="order-label">Store</div>
+                <div class="order-value">{{ order.store }}</div>
+
+                <div class="order-label">Description</div>
+                <div class="order-value">{{ order.short_description }}</div>
+
+                <div class="order-label">Article number</div>
+                <div class="order-value">{{ order.article_number|default:"-" }}</div>
+
+                <div class="order-label">URL</div>
+                <div class="order-value">
+                    {% if order.url %}
+                        <a href="{{ order.url }}" target="_blank" rel="noopener noreferrer">{{ order.url }}</a>
+                    {% else %}
+                        -
+                    {% endif %}
+                </div>
+
+                <div class="order-label">Price excl. VAT</div>
+                <div class="order-value">{{ order.total_price_excl_vat|default:"-" }}</div>
+
+                <div class="order-label">Delivery days</div>
+                <div class="order-value">{{ order.delivery_time_days|default:"-" }}</div>
+
+                <div class="order-label">Order number</div>
+                <div class="order-value">{{ order.ordernumber|default:"-" }}</div>
+
+                <div class="order-label">Finance order date</div>
+                <div class="order-value">
+                    {% if order.finance_order_date %}
+                        {{ order.finance_order_date|date:"Y-m-d" }}
+                    {% else %}
+                        -
+                    {% endif %}
+                </div>
+
+                <div class="order-label">Shipped date</div>
+                <div class="order-value">
+                    {% if order.shipped_date %}
+                        {{ order.shipped_date|date:"Y-m-d" }}
+                    {% else %}
+                        -
+                    {% endif %}
+                </div>
+
+                <div class="order-label">Received date</div>
+                <div class="order-value">
+                    {% if order.received_date %}
+                        {{ order.received_date|date:"Y-m-d" }}
+                    {% else %}
+                        -
+                    {% endif %}
+                </div>
+
+                <div class="order-label">Order type</div>
+                <div class="order-value">{{ order.get_order_type_display }}</div>
+
+                <div class="order-label">Purchase request number</div>
+                <div class="order-value">{{ order.purchase_request_number|default:"-" }}</div>
+
+                <div class="order-label">Decision reason</div>
+                <div class="order-value">{{ order.decision_reason|default:"-" }}</div>
+
+                <div class="order-label">Decided by</div>
+                <div class="order-value">
+                    {% if order.decided_by %}
+                        {{ order.decided_by.name }} ({{ order.decided_by.email }})
+                    {% else %}
+                        -
+                    {% endif %}
+                </div>
+
+                <div class="order-label">Decided at</div>
+                <div class="order-value">
+                    {% if order.decided_at %}
+                        {{ order.decided_at|date:"Y-m-d H:i" }}
+                    {% else %}
+                        -
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="order-card">
+            <h2>Remarks</h2>
+
+            <div class="order-remarks">
+                <div class="remark-box">
+                    <h3>Student remarks</h3>
+                    <div>{{ order.student_remarks|default:"-"|linebreaksbr }}</div>
+                </div>
+
+                <div class="remark-box">
+                    <h3>Teacher remarks</h3>
+                    <div>{{ order.teacher_remarks|default:"-"|linebreaksbr }}</div>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <div class="card">
-        <h2>Dates</h2>
-        <p><strong>Finance order date:</strong> {{ order.finance_order_date|default:"-" }}</p>
-        <p><strong>Shipped date:</strong> {{ order.shipped_date|default:"-" }}</p>
-        <p><strong>Received date:</strong> {{ order.received_date|default:"-" }}</p>
-    </div>
-
-    <div class="card">
-        <h2>Decision</h2>
-        <p><strong>Decision reason:</strong><br>{{ order.decision_reason|default:"-" }}</p>
-        <p>
-            <strong>Decided by:</strong>
-            {% if order.decided_by %}
-                {{ order.decided_by.name }} ({{ order.decided_by.email }})
-            {% else %}
-                -
-            {% endif %}
-        </p>
-        <p><strong>Decided at:</strong> {{ order.decided_at|default:"-" }}</p>
-    </div>
-
-    <p>
+    <div class="order-actions">
         {% if can_edit %}
-            <a href="{% url 'orders:order_edit' order.id %}">Edit this order</a>
-            |
+            <a href="{% url 'orders:order_edit' order.pk %}">Edit this order</a>
         {% endif %}
+
         {% if can_decide %}
-            <a href="{% url 'orders:order_decide' order.id %}">Approve / reject / request rework</a>
-            |
+            <a href="{% url 'orders:order_decide' order.pk %}">Approve / reject / request rework</a>
         {% endif %}
+
         <a href="{% url 'orders:order_list' %}">Back to orders</a>
-    </p>
+    </div>
+</div>
 {% endblock %}
