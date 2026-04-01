@@ -6,24 +6,89 @@
     <h1>{{ page_title }}</h1>
 
     <div class="card">
-        <form method="post">
-            {% csrf_token %}
+        <style>
+            .form-container {
+                max-width: 1400px;
+                margin: 0 auto;
+            }
 
-            {{ form.non_field_errors }}
+            .form-grid {
+                display: grid;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 1.25rem;
+            }
 
-            {% for field in form %}
-                <p>
-                    {{ field.label_tag }}<br>
-                    {{ field }}
-                    {% if field.errors %}
-                        <br>
-                        <span style="color: red;">{{ field.errors }}</span>
-                    {% endif %}
-                </p>
-            {% endfor %}
+            .form-field {
+                display: flex;
+                flex-direction: column;
+            }
 
-            <button type="submit">{{ submit_label }}</button>
-        </form>
+            .form-field label {
+                font-weight: 600;
+                margin-bottom: 0.25rem;
+            }
+
+            .form-field input,
+            .form-field textarea,
+            .form-field select {
+                padding: 0.5rem;
+                border-radius: 6px;
+                border: 1px solid #ccc;
+                font-size: 0.95rem;
+            }
+
+            .form-field textarea {
+                resize: vertical;
+            }
+
+            .form-actions {
+                margin-top: 1.5rem;
+            }
+
+            /* Medium screens → 2 columns */
+            @media (max-width: 1000px) {
+                .form-grid {
+                    grid-template-columns: repeat(2, 1fr);
+                }
+            }
+
+            /* Small screens → 1 column */
+            @media (max-width: 600px) {
+                .form-grid {
+                    grid-template-columns: 1fr;
+                }
+            }
+        </style>
+
+        <div class="form-container">
+            <form method="post">
+                {% csrf_token %}
+
+                <div class="form-grid">
+                    {% for field in form %}
+                        <div class="form-field">
+                            {{ field.label_tag }}
+
+                            {{ field }}
+
+                            {% if field.help_text %}
+                                <small>{{ field.help_text }}</small>
+                            {% endif %}
+
+                            {% for error in field.errors %}
+                                <div style="color: red; font-size: 0.9rem;">
+                                    {{ error }}
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% endfor %}
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit">{{ submit_label }}</button>
+                </div>
+            </form>
+        </div>
     </div>
 
     <p>

@@ -11,6 +11,7 @@ from django.utils import timezone
 from accounts.models import TeacherStudentLink
 from .forms import (
     AdminInlineOrderUpdateForm,
+    AdminOrderEditForm,
     OrderCreateForm,
     OrderDecisionForm,
     OrderEditForm,
@@ -369,14 +370,16 @@ def order_edit(request, order_id):
     if not user_can_edit_order(request.user, order):
         raise Http404("You do not have permission to edit this order.")
 
+    form_class = AdminOrderEditForm if request.user.role == User.ROLE_ADMIN else OrderEditForm
+
     if request.method == "POST":
-        form = OrderEditForm(request.POST, instance=order, user=request.user)
+        form = form_class(request.POST, instance=order, user=request.user)
         if form.is_valid():
             form.save()
             messages.success(request, f"Order {order.id} was updated successfully.")
             return redirect("orders:order_list")
     else:
-        form = OrderEditForm(instance=order, user=request.user)
+        form = form_class(instance=order, user=request.user)
 
     context = {
         "form": form,

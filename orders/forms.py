@@ -1,5 +1,6 @@
 from django import forms
 
+from accounts.models import User
 from .models import Order
 
 
@@ -27,7 +28,7 @@ class OrderBaseForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         self.user = user
 
-        if self.user and self.user.role == "student":
+        if self.user and self.user.role == User.ROLE_STUDENT:
             self.fields.pop("teacher_remarks", None)
 
         required_field_names = [
@@ -59,6 +60,70 @@ class OrderEditForm(OrderBaseForm):
     pass
 
 
+class AdminOrderEditForm(forms.ModelForm):
+    class Meta:
+        model = Order
+        fields = [
+            "status",
+            "store",
+            "article_number",
+            "ordernumber",
+            "quantity",
+            "short_description",
+            "url",
+            "total_price_excl_vat",
+            "delivery_time_days",
+            "student_remarks",
+            "teacher_remarks",
+            "finance_order_date",
+            "shipped_date",
+            "received_date",
+            "purchase_request_number",
+            "decision_reason",
+        ]
+        widgets = {
+            "short_description": forms.TextInput(attrs={"maxlength": 255}),
+            "student_remarks": forms.Textarea(attrs={"rows": 4}),
+            "teacher_remarks": forms.Textarea(attrs={"rows": 4}),
+            "decision_reason": forms.Textarea(attrs={"rows": 3}),
+            "finance_order_date": forms.DateInput(attrs={"type": "date"}),
+            "shipped_date": forms.DateInput(attrs={"type": "date"}),
+            "received_date": forms.DateInput(attrs={"type": "date"}),
+        }
+
+    def __init__(self, *args, user=None, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        required_field_names = [
+            "store",
+            "article_number",
+            "quantity",
+            "short_description",
+            "url",
+            "total_price_excl_vat",
+            "delivery_time_days",
+        ]
+
+        for field_name in required_field_names:
+            if field_name in self.fields:
+                self.fields[field_name].required = True
+
+        optional_field_names = [
+            "ordernumber",
+            "student_remarks",
+            "teacher_remarks",
+            "finance_order_date",
+            "shipped_date",
+            "received_date",
+            "purchase_request_number",
+            "decision_reason",
+        ]
+
+        for field_name in optional_field_names:
+            if field_name in self.fields:
+                self.fields[field_name].required = False
+
+
 class OrderDecisionForm(forms.Form):
     decision = forms.ChoiceField(
         choices=[
@@ -68,6 +133,7 @@ class OrderDecisionForm(forms.Form):
             (Order.STATUS_REWORK, "Needs rework"),
         ]
     )
+
     decision_reason = forms.CharField(
         required=False,
         widget=forms.Textarea(attrs={"rows": 2}),
