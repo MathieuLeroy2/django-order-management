@@ -9,7 +9,6 @@ class OrderBaseForm(forms.ModelForm):
         fields = [
             "store",
             "article_number",
-            "ordernumber",
             "quantity",
             "short_description",
             "url",
@@ -28,15 +27,12 @@ class OrderBaseForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         self.user = user
 
-        # Students may not edit teacher remarks at all
         if self.user and self.user.role == "student":
             self.fields.pop("teacher_remarks", None)
 
-        # Required fields for normal order entry
         required_field_names = [
             "store",
             "article_number",
-            "ordernumber",
             "quantity",
             "short_description",
             "url",
@@ -48,7 +44,6 @@ class OrderBaseForm(forms.ModelForm):
             if field_name in self.fields:
                 self.fields[field_name].required = True
 
-        # Remarks stay optional
         if "student_remarks" in self.fields:
             self.fields["student_remarks"].required = False
 
