@@ -236,7 +236,7 @@
                     {{ order.store }}
                 </td>
                 <td>
-                    <a href="{% url 'orders:order_detail' order.id %}">{{ order.short_description }}</a>
+                    <a href="{% url 'orders:order_edit' order.id %}">{{ order.short_description }}</a>
                 </td>
                 <td>{{ order.article_number|default:"-" }}</td>
                 <td>
