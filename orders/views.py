@@ -16,7 +16,7 @@ from .forms import (
     OrderDecisionForm,
     OrderEditForm,
 )
-from .models import AppSettings, Order
+from .models import AppSettings, Order, StoreRule
 
 User = get_user_model()
 
@@ -115,6 +115,8 @@ def user_can_decide_order(user, order):
 
     return False
 
+def get_store_rule_status(store_name):
+    return StoreRule.get_list_type_for_store(store_name) or "unlisted"
 
 @login_required
 def dashboard(request):
@@ -137,13 +139,20 @@ def order_list(request):
 
         form = OrderDecisionForm(request.POST)
         if form.is_valid():
-            order.status = form.cleaned_data["decision"]
-            order.decision_reason = form.cleaned_data["decision_reason"]
-            order.decided_by = request.user
-            order.decided_at = timezone.now()
-            order.save()
+            new_status = form.cleaned_data["decision"]
 
-            messages.success(request, f"Order {order.id} was updated successfully.")
+            if new_status == Order.STATUS_SUBMITTED and order.is_store_blacklisted():
+                messages.error(
+                    request,
+                    f"Order {order.id} uses a blacklisted store and cannot be submitted."
+                )
+            else:
+                order.status = new_status
+                order.decision_reason = form.cleaned_data["decision_reason"]
+                order.decided_by = request.user
+                order.decided_at = timezone.now()
+                order.save()
+                messages.success(request, f"Order {order.id} was updated successfully.")
 
             return_query = request.POST.get("return_query", "").strip()
             if return_query:
@@ -343,9 +352,12 @@ def order_create(request):
             else:
                 order.order_type = Order.ORDER_TYPE_TEACHER
 
-            order.save()
-            messages.success(request, f"Order {order.id} was created successfully.")
-            return redirect("orders:order_list")
+            if order.is_store_blacklisted():
+                form.add_error("store", "This store is blacklisted. Orders for blacklisted stores cannot be submitted.")
+            else:
+                order.save()
+                messages.success(request, f"Order {order.id} was created successfully.")
+                return redirect("orders:order_list")
     else:
         form = OrderCreateForm(user=request.user)
 
@@ -375,9 +387,14 @@ def order_edit(request, order_id):
     if request.method == "POST":
         form = form_class(request.POST, instance=order, user=request.user)
         if form.is_valid():
-            form.save()
-            messages.success(request, f"Order {order.id} was updated successfully.")
-            return redirect("orders:order_list")
+            updated_order = form.save(commit=False)
+
+            if updated_order.status == Order.STATUS_SUBMITTED and updated_order.is_store_blacklisted():
+                form.add_error("store", "This store is blacklisted. Orders for blacklisted stores cannot be submitted.")
+            else:
+                updated_order.save()
+                messages.success(request, f"Order {order.id} was updated successfully.")
+                return redirect("orders:order_list")
     else:
         form = form_class(instance=order, user=request.user)
 
@@ -403,13 +420,18 @@ def order_decide(request, order_id):
     if request.method == "POST":
         form = OrderDecisionForm(request.POST)
         if form.is_valid():
-            order.status = form.cleaned_data["decision"]
-            order.decision_reason = form.cleaned_data["decision_reason"]
-            order.decided_by = request.user
-            order.decided_at = timezone.now()
-            order.save()
-            messages.success(request, f"Order {order.id} was updated successfully.")
-            return redirect("orders:order_detail", order_id=order.id)
+            new_status = form.cleaned_data["decision"]
+
+            if new_status == Order.STATUS_SUBMITTED and order.is_store_blacklisted():
+                form.add_error("decision", "This store is blacklisted. Orders for blacklisted stores cannot be submitted.")
+            else:
+                order.status = new_status
+                order.decision_reason = form.cleaned_data["decision_reason"]
+                order.decided_by = request.user
+                order.decided_at = timezone.now()
+                order.save()
+                messages.success(request, f"Order {order.id} was updated successfully.")
+                return redirect("orders:order_detail", order_id=order.id)
     else:
         form = OrderDecisionForm(
             initial={

@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import AppSettings, Order
+from .models import AppSettings, Order, StoreRule
 
 
 @admin.register(Order)
@@ -30,12 +30,13 @@ class OrderAdmin(admin.ModelAdmin):
     readonly_fields = ("created_at",)
 
 
+@admin.register(StoreRule)
+class StoreRuleAdmin(admin.ModelAdmin):
+    list_display = ("store_name", "list_type")
+    list_filter = ("list_type",)
+    search_fields = ("store_name",)
+
+
 @admin.register(AppSettings)
 class AppSettingsAdmin(admin.ModelAdmin):
     list_display = ("soft_spending_limit",)
-
-    def has_add_permission(self, request):
-        return not AppSettings.objects.exists()
-
-    def has_delete_permission(self, request, obj=None):
-        return False

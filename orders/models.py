@@ -68,6 +68,12 @@ class Order(models.Model):
 
     def __str__(self):
         return f"{self.short_description} ({self.get_status_display()})"
+    
+    def get_store_list_type(self):
+        return StoreRule.get_list_type_for_store(self.store)
+
+    def is_store_blacklisted(self):
+        return self.get_store_list_type() == StoreRule.LIST_TYPE_BLACKLIST
 
     def clean(self):
         if self.status in [self.STATUS_REJECTED, self.STATUS_REWORK] and not self.decision_reason:
@@ -77,6 +83,36 @@ class Order(models.Model):
                 }
             )
 
+
+class StoreRule(models.Model):
+    LIST_TYPE_WHITELIST = "whitelist"
+    LIST_TYPE_BLACKLIST = "blacklist"
+
+    LIST_TYPE_CHOICES = [
+        (LIST_TYPE_WHITELIST, "Whitelist"),
+        (LIST_TYPE_BLACKLIST, "Blacklist"),
+    ]
+
+    store_name = models.CharField(max_length=255, unique=True)
+    list_type = models.CharField(max_length=20, choices=LIST_TYPE_CHOICES)
+
+    class Meta:
+        ordering = ["store_name"]
+
+    def __str__(self):
+        return f"{self.store_name} ({self.get_list_type_display()})"
+
+    @classmethod
+    def get_list_type_for_store(cls, store_name):
+        normalized_name = (store_name or "").strip()
+        if not normalized_name:
+            return None
+
+        rule = cls.objects.filter(store_name__iexact=normalized_name).first()
+        if not rule:
+            return None
+
+        return rule.list_type
 
 class AppSettings(models.Model):
     soft_spending_limit = models.DecimalField(
