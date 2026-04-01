@@ -10,6 +10,12 @@ def get_whitelisted_store_names():
         .values_list("store_name", flat=True)
     )
 
+def get_all_listed_store_names():
+    return list(
+        StoreRule.objects.order_by("store_name")
+        .values_list("store_name", flat=True)
+    )
+
 
 class OrderBaseForm(forms.ModelForm):
     class Meta:
@@ -97,6 +103,13 @@ class AdminOrderEditForm(forms.ModelForm):
             "decision_reason",
         ]
         widgets = {
+            "store": forms.TextInput(
+                attrs={
+                    "list": "whitelisted-stores",
+                    "autocomplete": "off",
+                    "placeholder": "Select a listed store or type a new one",
+                }
+            ),
             "short_description": forms.TextInput(attrs={"maxlength": 255}),
             "student_remarks": forms.Textarea(attrs={"rows": 4}),
             "teacher_remarks": forms.Textarea(attrs={"rows": 4}),
@@ -108,6 +121,7 @@ class AdminOrderEditForm(forms.ModelForm):
 
     def __init__(self, *args, user=None, **kwargs):
         super().__init__(*args, **kwargs)
+        self.whitelisted_store_names = get_all_listed_store_names()
 
         required_field_names = [
             "store",
