@@ -153,6 +153,10 @@
                 <option value="-total_price_excl_vat" {% if primary_sort == "-total_price_excl_vat" %}selected{% endif %}>Price high-low</option>
                 <option value="finance_order_date" {% if primary_sort == "finance_order_date" %}selected{% endif %}>Finance oldest</option>
                 <option value="-finance_order_date" {% if primary_sort == "-finance_order_date" %}selected{% endif %}>Finance newest</option>
+                <option value="shipped_date" {% if primary_sort == "shipped_date" %}selected{% endif %}>Shipped oldest</option>
+                <option value="-shipped_date" {% if primary_sort == "-shipped_date" %}selected{% endif %}>Shipped newest</option>
+                <option value="received_date" {% if primary_sort == "received_date" %}selected{% endif %}>Received oldest</option>
+                <option value="-received_date" {% if primary_sort == "-received_date" %}selected{% endif %}>Received newest</option>
                 <option value="user__name" {% if primary_sort == "user__name" %}selected{% endif %}>User A-Z</option>
                 <option value="-user__name" {% if primary_sort == "-user__name" %}selected{% endif %}>User Z-A</option>
             </select>
@@ -175,6 +179,10 @@
                 <option value="-total_price_excl_vat" {% if secondary_sort == "-total_price_excl_vat" %}selected{% endif %}>2nd: Price high-low</option>
                 <option value="finance_order_date" {% if secondary_sort == "finance_order_date" %}selected{% endif %}>2nd: Finance oldest</option>
                 <option value="-finance_order_date" {% if secondary_sort == "-finance_order_date" %}selected{% endif %}>2nd: Finance newest</option>
+                <option value="shipped_date" {% if secondary_sort == "shipped_date" %}selected{% endif %}>2nd: Shipped oldest</option>
+                <option value="-shipped_date" {% if secondary_sort == "-shipped_date" %}selected{% endif %}>2nd: Shipped newest</option>
+                <option value="received_date" {% if secondary_sort == "received_date" %}selected{% endif %}>2nd: Received oldest</option>
+                <option value="-received_date" {% if secondary_sort == "-received_date" %}selected{% endif %}>2nd: Received newest</option>
                 <option value="user__name" {% if secondary_sort == "user__name" %}selected{% endif %}>2nd: User A-Z</option>
                 <option value="-user__name" {% if secondary_sort == "-user__name" %}selected{% endif %}>2nd: User Z-A</option>
             </select>
@@ -203,6 +211,9 @@
             <th>URL</th>
             <th>Price excl. VAT</th>
             <th>Delivery days</th>
+            <th>Finance order date</th>
+            <th>Shipped date</th>
+            <th>Received date</th>
             <th>Student remarks</th>
             <th>Teacher remarks</th>
             <th>Status</th>
@@ -234,6 +245,27 @@
                 </td>
                 <td>{{ order.total_price_excl_vat|default:"-" }}</td>
                 <td>{{ order.delivery_time_days|default:"-" }}</td>
+                <td>
+                    {% if order.finance_order_date %}
+                        {{ order.finance_order_date|date:"Y-m-d" }}
+                    {% else %}
+                        -
+                    {% endif %}
+                </td>
+                <td>
+                    {% if order.shipped_date %}
+                        {{ order.shipped_date|date:"Y-m-d" }}
+                    {% else %}
+                        -
+                    {% endif %}
+                </td>
+                <td>
+                    {% if order.received_date %}
+                        {{ order.received_date|date:"Y-m-d" }}
+                    {% else %}
+                        -
+                    {% endif %}
+                </td>
                 <td>{{ order.student_remarks|default:"-" }}</td>
                 <td>{{ order.teacher_remarks|default:"-" }}</td>
                 <td>{{ order.get_status_display }}</td>
@@ -290,7 +322,7 @@
             </tr>
         {% empty %}
             <tr>
-                <td colspan="18">No orders found.</td>
+                <td colspan="21">No orders found.</td>
             </tr>
         {% endfor %}
     </tbody>
