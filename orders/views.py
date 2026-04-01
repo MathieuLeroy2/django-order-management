@@ -298,6 +298,7 @@ def order_list(request):
         order.can_edit = user_can_edit_order(request.user, order)
         order.can_decide = user_can_decide_order(request.user, order)
         order.can_inline_admin_edit = request.user.role == User.ROLE_ADMIN
+        order.store_rule_status = get_store_rule_status(order.store)
 
     context = {
         "orders": orders,

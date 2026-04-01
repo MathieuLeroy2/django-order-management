@@ -3,6 +3,13 @@
 {% block title %}Orders{% endblock %}
 
 {% block content %}
+
+<style>
+    .store-unlisted-warning {
+        background-color: #ff9c11;
+    }
+</style>
+
 <h1>Orders</h1>
 
 <p>
@@ -225,7 +232,9 @@
                 <td>{{ order.user.name }}</td>
                 <td>{{ order.get_status_display }}</td>
                 <td>{{ order.quantity }}</td>
-                <td>{{ order.store }}</td>
+                <td class="{% if order.store_rule_status == 'unlisted' %}store-unlisted-warning{% endif %}">
+                    {{ order.store }}
+                </td>
                 <td>
                     <a href="{% url 'orders:order_detail' order.id %}">{{ order.short_description }}</a>
                 </td>
