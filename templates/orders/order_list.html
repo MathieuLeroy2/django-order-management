@@ -201,41 +201,35 @@
 <table border="1" cellpadding="6" cellspacing="0" style="width: 100%; border-collapse: collapse;">
     <thead>
         <tr>
-            <th>ID</th>
-            <th>Description</th>
             <th>User</th>
-            <th>Store</th>
-            <th>Order number</th>
-            <th>Article number</th>
+            <th>Status</th>
             <th>Quantity</th>
+            <th>Store</th>
+            <th>Description</th>
+            <th>Article number</th>
             <th>URL</th>
             <th>Price excl. VAT</th>
             <th>Delivery days</th>
+            <th>Student remarks</th>
+            <th>Teacher remarks</th>
+            <th>Actions</th>
+            <th>Order number</th>
             <th>Finance order date</th>
             <th>Shipped date</th>
             <th>Received date</th>
-            <th>Student remarks</th>
-            <th>Teacher remarks</th>
-            <th>Status</th>
-            <th>Decision reason</th>
-            <th>Decided by</th>
-            <th>Decided at</th>
-            <th>Created</th>
-            <th>Actions</th>
         </tr>
     </thead>
     <tbody>
         {% for order in orders %}
             <tr>
-                <td>{{ order.id }}</td>
+                <td>{{ order.user.name }}</td>
+                <td>{{ order.get_status_display }}</td>
+                <td>{{ order.quantity }}</td>
+                <td>{{ order.store }}</td>
                 <td>
                     <a href="{% url 'orders:order_detail' order.id %}">{{ order.short_description }}</a>
                 </td>
-                <td>{{ order.user.name }}</td>
-                <td>{{ order.store }}</td>
-                <td>{{ order.ordernumber|default:"-" }}</td>
                 <td>{{ order.article_number|default:"-" }}</td>
-                <td>{{ order.quantity }}</td>
                 <td>
                     {% if order.url %}
                         <a href="{{ order.url }}" target="_blank" rel="noopener noreferrer">Link</a>
@@ -245,46 +239,8 @@
                 </td>
                 <td>{{ order.total_price_excl_vat|default:"-" }}</td>
                 <td>{{ order.delivery_time_days|default:"-" }}</td>
-                <td>
-                    {% if order.finance_order_date %}
-                        {{ order.finance_order_date|date:"Y-m-d" }}
-                    {% else %}
-                        -
-                    {% endif %}
-                </td>
-                <td>
-                    {% if order.shipped_date %}
-                        {{ order.shipped_date|date:"Y-m-d" }}
-                    {% else %}
-                        -
-                    {% endif %}
-                </td>
-                <td>
-                    {% if order.received_date %}
-                        {{ order.received_date|date:"Y-m-d" }}
-                    {% else %}
-                        -
-                    {% endif %}
-                </td>
                 <td>{{ order.student_remarks|default:"-" }}</td>
                 <td>{{ order.teacher_remarks|default:"-" }}</td>
-                <td>{{ order.get_status_display }}</td>
-                <td>{{ order.decision_reason|default:"-" }}</td>
-                <td>
-                    {% if order.decided_by %}
-                        {{ order.decided_by.name }}
-                    {% else %}
-                        -
-                    {% endif %}
-                </td>
-                <td>
-                    {% if order.decided_at %}
-                        {{ order.decided_at|date:"Y-m-d H:i" }}
-                    {% else %}
-                        -
-                    {% endif %}
-                </td>
-                <td>{{ order.created_at|date:"Y-m-d H:i" }}</td>
                 <td>
                     {% if order.can_decide %}
                         <form method="post" style="margin-bottom: 0.5rem;">
@@ -319,10 +275,32 @@
                         -
                     {% endif %}
                 </td>
+                <td>{{ order.ordernumber|default:"-" }}</td>
+                <td>
+                    {% if order.finance_order_date %}
+                        {{ order.finance_order_date|date:"Y-m-d" }}
+                    {% else %}
+                        -
+                    {% endif %}
+                </td>
+                <td>
+                    {% if order.shipped_date %}
+                        {{ order.shipped_date|date:"Y-m-d" }}
+                    {% else %}
+                        -
+                    {% endif %}
+                </td>
+                <td>
+                    {% if order.received_date %}
+                        {{ order.received_date|date:"Y-m-d" }}
+                    {% else %}
+                        -
+                    {% endif %}
+                </td>
             </tr>
         {% empty %}
             <tr>
-                <td colspan="21">No orders found.</td>
+                <td colspan="16">No orders found.</td>
             </tr>
         {% endfor %}
     </tbody>
