@@ -36,7 +36,9 @@ def get_filterable_users_for_user(user):
 
     if user.role == User.ROLE_TEACHER:
         linked_ids = get_linked_student_ids_for_teacher(user)
-        return User.objects.filter(Q(id=user.id) | Q(id__in=linked_ids)).distinct().order_by("name")
+        return User.objects.filter(
+            Q(id=user.id) | Q(id__in=linked_ids)
+        ).distinct().order_by("name")
 
     return User.objects.filter(id=user.id).order_by("name")
 
@@ -130,7 +132,12 @@ def order_list(request):
             order.decided_by = request.user
             order.decided_at = timezone.now()
             order.save()
+
             messages.success(request, f"Order {order.id} was updated successfully.")
+
+            return_query = request.POST.get("return_query", "").strip()
+            if return_query:
+                return redirect(f"{request.path}?{return_query}")
             return redirect("orders:order_list")
         else:
             messages.error(request, "Could not update the order. Please check the form.")
