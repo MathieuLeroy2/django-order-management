@@ -12,6 +12,7 @@
         <p><strong>Status:</strong> {{ order.get_status_display }}</p>
         <p><strong>Store:</strong> {{ order.store }}</p>
         <p><strong>Article number:</strong> {{ order.article_number|default:"-" }}</p>
+        <p><strong>Order number:</strong> {{ order.ordernumber|default:"-" }}</p>
         <p><strong>Quantity:</strong> {{ order.quantity }}</p>
         <p><strong>URL:</strong>
             {% if order.url %}
