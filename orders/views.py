@@ -101,6 +101,10 @@ def user_can_decide_order(user, order):
     if user.role != User.ROLE_TEACHER:
         return False
 
+    # Once an order is approved or rejected, only admins may still change it
+    if order.status in [Order.STATUS_APPROVED, Order.STATUS_REJECTED]:
+        return False
+
     if order.order_type == Order.ORDER_TYPE_TEACHER and order.user_id == user.id:
         return True
 
