@@ -15,15 +15,20 @@ class User(AbstractUser):
         (ROLE_STUDENT, "Student"),
     ]
 
-    email = models.EmailField(unique=True)
+    email = models.EmailField(blank=True, null=True, unique=True)
     name = models.CharField(max_length=255)
     role = models.CharField(max_length=20, choices=ROLE_CHOICES, default=ROLE_STUDENT)
 
-    USERNAME_FIELD = "email"
-    REQUIRED_FIELDS = ["username", "name"]
+    USERNAME_FIELD = "username"
+    REQUIRED_FIELDS = ["name"]
+
+    def save(self, *args, **kwargs):
+        if self.email == "":
+            self.email = None
+        super().save(*args, **kwargs)
 
     def __str__(self):
-        return f"{self.name} ({self.email})"
+        return f"{self.name} ({self.username})"
 
 
 class TeacherStudentLink(models.Model):
@@ -52,7 +57,6 @@ class TeacherStudentLink(models.Model):
     def clean(self):
         if self.teacher and self.teacher.role != User.ROLE_TEACHER:
             raise ValidationError({"teacher": "Selected user must have role Teacher."})
-
         if self.student and self.student.role != User.ROLE_STUDENT:
             raise ValidationError({"student": "Selected user must have role Student."})
 
