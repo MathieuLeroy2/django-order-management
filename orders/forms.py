@@ -1,7 +1,14 @@
 from django import forms
 
 from accounts.models import User
-from .models import Order
+from .models import Order, StoreRule
+
+def get_whitelisted_store_names():
+    return list(
+        StoreRule.objects.filter(list_type=StoreRule.LIST_TYPE_WHITELIST)
+        .order_by("store_name")
+        .values_list("store_name", flat=True)
+    )
 
 
 class OrderBaseForm(forms.ModelForm):
@@ -19,6 +26,13 @@ class OrderBaseForm(forms.ModelForm):
             "teacher_remarks",
         ]
         widgets = {
+            "store": forms.TextInput(
+                attrs={
+                    "list": "whitelisted-stores",
+                    "autocomplete": "off",
+                    "placeholder": "Select a whitelisted store or type a new one",
+                }
+            ),
             "short_description": forms.TextInput(attrs={"maxlength": 255}),
             "student_remarks": forms.Textarea(attrs={"rows": 4}),
             "teacher_remarks": forms.Textarea(attrs={"rows": 4}),
@@ -27,6 +41,7 @@ class OrderBaseForm(forms.ModelForm):
     def __init__(self, *args, user=None, **kwargs):
         super().__init__(*args, **kwargs)
         self.user = user
+        self.whitelisted_store_names = get_whitelisted_store_names()
 
         if self.user and self.user.role == User.ROLE_STUDENT:
             self.fields.pop("teacher_remarks", None)

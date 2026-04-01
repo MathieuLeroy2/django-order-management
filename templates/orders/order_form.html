@@ -71,6 +71,15 @@
 
                             {{ field }}
 
+                            {% if field.name == "store" and form.whitelisted_store_names %}
+                                <datalist id="whitelisted-stores">
+                                    {% for store_name in form.whitelisted_store_names %}
+                                        <option value="{{ store_name }}"></option>
+                                    {% endfor %}
+                                </datalist>
+                                <small>Choose a whitelisted store from the dropdown or type a new one manually.</small>
+                            {% endif %}
+
                             {% if field.help_text %}
                                 <small>{{ field.help_text }}</small>
                             {% endif %}
