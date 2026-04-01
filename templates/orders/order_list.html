@@ -1,140 +1,225 @@
 {% extends "base.html" %}
+
 {% block title %}Orders{% endblock %}
 
 {% block content %}
 <h1>Orders</h1>
 
-<p><a href="{% url 'orders:order_create' %}">Create a new order</a></p>
+<p>
+    <a href="{% url 'orders:order_create' %}">Create a new order</a>
+</p>
 
-<form method="get">
-    <table>
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Description</th>
-                <th>User</th>
-                <th>Store</th>
-                <th>Order number</th>
-                <th>Article number</th>
-                <th>Quantity</th>
-                <th>URL</th>
-                <th>Price excl. VAT</th>
-                <th>Delivery days</th>
-                <th>Student remarks</th>
-                <th>Teacher remarks</th>
-                <th>Status</th>
-                <th>Decision reason</th>
-                <th>Decided by</th>
-                <th>Decided at</th>
-                <th>Created</th>
-                <th>Actions</th>
+<hr>
+
+<h2>Totals</h2>
+
+<div style="margin-bottom: 1rem;">
+    <p>
+        <strong>Total value of currently visible orders:</strong>
+        {{ visible_total|default:"0.00" }}
+    </p>
+
+    <p>
+        <strong>Soft spending limit:</strong>
+        {% if soft_spending_limit %}
+            {{ soft_spending_limit }}
+        {% else %}
+            Not set
+        {% endif %}
+    </p>
+</div>
+
+<table border="1" cellpadding="6" cellspacing="0" style="margin-bottom: 1.5rem; width: 100%; border-collapse: collapse;">
+    <thead>
+        <tr>
+            <th>User</th>
+            <th>Requested total</th>
+            <th>Soft limit</th>
+            <th>Status</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for row in spending_rows %}
+            <tr {% if row.is_over_limit %}style="background-color: #ffe0e0;"{% endif %}>
+                <td>{{ row.user.name }}</td>
+                <td>{{ row.requested_total }}</td>
+                <td>
+                    {% if soft_spending_limit %}
+                        {{ soft_spending_limit }}
+                    {% else %}
+                        -
+                    {% endif %}
+                </td>
+                <td>
+                    {% if row.is_over_limit %}
+                        <strong style="color: red;">Over limit</strong>
+                    {% else %}
+                        OK
+                    {% endif %}
+                </td>
             </tr>
+        {% empty %}
             <tr>
-            <th></th>
-            <th><input type="text" name="search" value="{{ search }}" placeholder="Search"></th>
-            <th>
-                <select name="user_filter">
-                    <option value="">All users</option>
-                    {% for filter_user in visible_users %}
-                        <option value="{{ filter_user.id }}" {% if user_filter == filter_user.id|stringformat:"s" %}selected{% endif %}>
-                            {{ filter_user.name }}{% if filter_user.email %} ({{ filter_user.email }}){% endif %}
-                        </option>
-                    {% endfor %}
-                </select>
-            </th>
-            <th><input type="text" name="store" value="{{ store_filter }}" placeholder="Store"></th>
-            <th>
-                <input type="text" name="ordernumber" value="{{ ordernumber_filter }}" placeholder="Exact">
-                <select name="ordernumber_presence_filter">
-                    <option value="">All</option>
-                    <option value="empty" {% if ordernumber_presence_filter == "empty" %}selected{% endif %}>Empty</option>
-                    <option value="filled" {% if ordernumber_presence_filter == "filled" %}selected{% endif %}>Filled</option>
-                </select>
-            </th>
-                <th></th>
-                <th></th>
-                <th></th>
-                <th></th>
-                <th></th>
-                <th></th>
-                <th></th>
-                <th>
-                    <select name="status">
-                        <option value="">All</option>
-                        {% for value, label in status_choices %}
-                            <option value="{{ value }}" {% if status_filter == value %}selected{% endif %}>{{ label }}</option>
-                        {% endfor %}
-                    </select>
-                </th>
-                <th></th>
-                <th></th>
-                <th></th>
-                <th>
-                    <select name="finance_order_date_filter">
-                        <option value="">Finance</option>
-                        <option value="empty" {% if finance_order_date_filter == "empty" %}selected{% endif %}>Empty</option>
-                        <option value="filled" {% if finance_order_date_filter == "filled" %}selected{% endif %}>Filled</option>
-                    </select>
-                    <select name="shipped_date_filter">
-                        <option value="">Shipped</option>
-                        <option value="empty" {% if shipped_date_filter == "empty" %}selected{% endif %}>Empty</option>
-                        <option value="filled" {% if shipped_date_filter == "filled" %}selected{% endif %}>Filled</option>
-                    </select>
-                    <select name="received_date_filter">
-                        <option value="">Received</option>
-                        <option value="empty" {% if received_date_filter == "empty" %}selected{% endif %}>Empty</option>
-                        <option value="filled" {% if received_date_filter == "filled" %}selected{% endif %}>Filled</option>
-                    </select>
-                </th>
-                <th>
-                    <select name="primary_sort">
-                        <option value="store" {% if primary_sort == "store" %}selected{% endif %}>Store A-Z</option>
-                        <option value="-store" {% if primary_sort == "-store" %}selected{% endif %}>Store Z-A</option>
-                        <option value="ordernumber" {% if primary_sort == "ordernumber" %}selected{% endif %}>Order nr A-Z</option>
-                        <option value="-ordernumber" {% if primary_sort == "-ordernumber" %}selected{% endif %}>Order nr Z-A</option>
-                        <option value="-created_at" {% if primary_sort == "-created_at" %}selected{% endif %}>Newest first</option>
-                        <option value="created_at" {% if primary_sort == "created_at" %}selected{% endif %}>Oldest first</option>
-                        <option value="status" {% if primary_sort == "status" %}selected{% endif %}>Status A-Z</option>
-                        <option value="-status" {% if primary_sort == "-status" %}selected{% endif %}>Status Z-A</option>
-                        <option value="quantity" {% if primary_sort == "quantity" %}selected{% endif %}>Quantity low-high</option>
-                        <option value="-quantity" {% if primary_sort == "-quantity" %}selected{% endif %}>Quantity high-low</option>
-                        <option value="total_price_excl_vat" {% if primary_sort == "total_price_excl_vat" %}selected{% endif %}>Price low-high</option>
-                        <option value="-total_price_excl_vat" {% if primary_sort == "-total_price_excl_vat" %}selected{% endif %}>Price high-low</option>
-                        <option value="finance_order_date" {% if primary_sort == "finance_order_date" %}selected{% endif %}>Finance oldest</option>
-                        <option value="-finance_order_date" {% if primary_sort == "-finance_order_date" %}selected{% endif %}>Finance newest</option>
-                        <option value="user__name" {% if primary_sort == "user__name" %}selected{% endif %}>User A-Z</option>
-                        <option value="-user__name" {% if primary_sort == "-user__name" %}selected{% endif %}>User Z-A</option>
-                    </select>
-
-                    <select name="secondary_sort">
-                        <option value="-created_at" {% if secondary_sort == "-created_at" %}selected{% endif %}>2nd: Newest</option>
-                        <option value="created_at" {% if secondary_sort == "created_at" %}selected{% endif %}>2nd: Oldest</option>
-                        <option value="store" {% if secondary_sort == "store" %}selected{% endif %}>2nd: Store A-Z</option>
-                        <option value="-store" {% if secondary_sort == "-store" %}selected{% endif %}>2nd: Store Z-A</option>
-                        <option value="ordernumber" {% if secondary_sort == "ordernumber" %}selected{% endif %}>2nd: Order nr A-Z</option>
-                        <option value="-ordernumber" {% if secondary_sort == "-ordernumber" %}selected{% endif %}>2nd: Order nr Z-A</option>
-                        <option value="status" {% if secondary_sort == "status" %}selected{% endif %}>2nd: Status A-Z</option>
-                        <option value="-status" {% if secondary_sort == "-status" %}selected{% endif %}>2nd: Status Z-A</option>
-                        <option value="quantity" {% if secondary_sort == "quantity" %}selected{% endif %}>2nd: Quantity low-high</option>
-                        <option value="-quantity" {% if secondary_sort == "-quantity" %}selected{% endif %}>2nd: Quantity high-low</option>
-                        <option value="total_price_excl_vat" {% if secondary_sort == "total_price_excl_vat" %}selected{% endif %}>2nd: Price low-high</option>
-                        <option value="-total_price_excl_vat" {% if secondary_sort == "-total_price_excl_vat" %}selected{% endif %}>2nd: Price high-low</option>
-                        <option value="finance_order_date" {% if secondary_sort == "finance_order_date" %}selected{% endif %}>2nd: Finance oldest</option>
-                        <option value="-finance_order_date" {% if secondary_sort == "-finance_order_date" %}selected{% endif %}>2nd: Finance newest</option>
-                        <option value="user__name" {% if secondary_sort == "user__name" %}selected{% endif %}>2nd: User A-Z</option>
-                        <option value="-user__name" {% if secondary_sort == "-user__name" %}selected{% endif %}>2nd: User Z-A</option>
-                    </select>
-
-                    <button type="submit">Apply</button>
-                    <a href="{% url 'orders:order_list' %}">Reset</a>
-                </th>
+                <td colspan="4">No totals available.</td>
             </tr>
-        </thead>
-        <tbody>
-            {% for order in orders %}
+        {% endfor %}
+    </tbody>
+</table>
+
+<hr>
+
+<form method="get" style="margin-bottom: 1.5rem;">
+    <div style="display: flex; flex-wrap: wrap; gap: 0.75rem; align-items: end;">
+        <div>
+            <label for="search">Search</label><br>
+            <input type="text" name="search" id="search" value="{{ search }}">
+        </div>
+
+        <div>
+            <label for="user_id">User</label><br>
+            <select name="user_id" id="user_id">
+                <option value="">All users</option>
+                {% for filter_user in user_choices %}
+                    <option value="{{ filter_user.id }}" {% if user_filter == filter_user.id|stringformat:"s" %}selected{% endif %}>
+                        {{ filter_user.name }}{% if filter_user.email %} ({{ filter_user.email }}){% endif %}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div>
+            <label for="ordernumber">Order number</label><br>
+            <input type="text" name="ordernumber" id="ordernumber" value="{{ ordernumber_filter }}">
+        </div>
+
+        <div>
+            <label for="status">Status</label><br>
+            <select name="status" id="status">
+                <option value="">All</option>
+                {% for value, label in status_choices %}
+                    <option value="{{ value }}" {% if status_filter == value %}selected{% endif %}>
+                        {{ label }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div>
+            <label for="finance_order_date_filter">Finance</label><br>
+            <select name="finance_order_date_filter" id="finance_order_date_filter">
+                <option value="">All</option>
+                <option value="empty" {% if finance_order_date_filter == "empty" %}selected{% endif %}>Empty</option>
+                <option value="filled" {% if finance_order_date_filter == "filled" %}selected{% endif %}>Filled</option>
+            </select>
+        </div>
+
+        <div>
+            <label for="shipped_date_filter">Shipped</label><br>
+            <select name="shipped_date_filter" id="shipped_date_filter">
+                <option value="">All</option>
+                <option value="empty" {% if shipped_date_filter == "empty" %}selected{% endif %}>Empty</option>
+                <option value="filled" {% if shipped_date_filter == "filled" %}selected{% endif %}>Filled</option>
+            </select>
+        </div>
+
+        <div>
+            <label for="received_date_filter">Received</label><br>
+            <select name="received_date_filter" id="received_date_filter">
+                <option value="">All</option>
+                <option value="empty" {% if received_date_filter == "empty" %}selected{% endif %}>Empty</option>
+                <option value="filled" {% if received_date_filter == "filled" %}selected{% endif %}>Filled</option>
+            </select>
+        </div>
+
+        <div>
+            <label for="store">Store</label><br>
+            <input type="text" name="store" id="store" value="{{ store_filter }}">
+        </div>
+
+        <div>
+            <label for="primary_sort">Primary sort</label><br>
+            <select name="primary_sort" id="primary_sort">
+                <option value="store" {% if primary_sort == "store" %}selected{% endif %}>Store A-Z</option>
+                <option value="-store" {% if primary_sort == "-store" %}selected{% endif %}>Store Z-A</option>
+                <option value="ordernumber" {% if primary_sort == "ordernumber" %}selected{% endif %}>Order nr A-Z</option>
+                <option value="-ordernumber" {% if primary_sort == "-ordernumber" %}selected{% endif %}>Order nr Z-A</option>
+                <option value="-created_at" {% if primary_sort == "-created_at" %}selected{% endif %}>Newest first</option>
+                <option value="created_at" {% if primary_sort == "created_at" %}selected{% endif %}>Oldest first</option>
+                <option value="status" {% if primary_sort == "status" %}selected{% endif %}>Status A-Z</option>
+                <option value="-status" {% if primary_sort == "-status" %}selected{% endif %}>Status Z-A</option>
+                <option value="quantity" {% if primary_sort == "quantity" %}selected{% endif %}>Quantity low-high</option>
+                <option value="-quantity" {% if primary_sort == "-quantity" %}selected{% endif %}>Quantity high-low</option>
+                <option value="total_price_excl_vat" {% if primary_sort == "total_price_excl_vat" %}selected{% endif %}>Price low-high</option>
+                <option value="-total_price_excl_vat" {% if primary_sort == "-total_price_excl_vat" %}selected{% endif %}>Price high-low</option>
+                <option value="finance_order_date" {% if primary_sort == "finance_order_date" %}selected{% endif %}>Finance oldest</option>
+                <option value="-finance_order_date" {% if primary_sort == "-finance_order_date" %}selected{% endif %}>Finance newest</option>
+                <option value="user__name" {% if primary_sort == "user__name" %}selected{% endif %}>User A-Z</option>
+                <option value="-user__name" {% if primary_sort == "-user__name" %}selected{% endif %}>User Z-A</option>
+            </select>
+        </div>
+
+        <div>
+            <label for="secondary_sort">Secondary sort</label><br>
+            <select name="secondary_sort" id="secondary_sort">
+                <option value="-created_at" {% if secondary_sort == "-created_at" %}selected{% endif %}>2nd: Newest</option>
+                <option value="created_at" {% if secondary_sort == "created_at" %}selected{% endif %}>2nd: Oldest</option>
+                <option value="store" {% if secondary_sort == "store" %}selected{% endif %}>2nd: Store A-Z</option>
+                <option value="-store" {% if secondary_sort == "-store" %}selected{% endif %}>2nd: Store Z-A</option>
+                <option value="ordernumber" {% if secondary_sort == "ordernumber" %}selected{% endif %}>2nd: Order nr A-Z</option>
+                <option value="-ordernumber" {% if secondary_sort == "-ordernumber" %}selected{% endif %}>2nd: Order nr Z-A</option>
+                <option value="status" {% if secondary_sort == "status" %}selected{% endif %}>2nd: Status A-Z</option>
+                <option value="-status" {% if secondary_sort == "-status" %}selected{% endif %}>2nd: Status Z-A</option>
+                <option value="quantity" {% if secondary_sort == "quantity" %}selected{% endif %}>2nd: Quantity low-high</option>
+                <option value="-quantity" {% if secondary_sort == "-quantity" %}selected{% endif %}>2nd: Quantity high-low</option>
+                <option value="total_price_excl_vat" {% if secondary_sort == "total_price_excl_vat" %}selected{% endif %}>2nd: Price low-high</option>
+                <option value="-total_price_excl_vat" {% if secondary_sort == "-total_price_excl_vat" %}selected{% endif %}>2nd: Price high-low</option>
+                <option value="finance_order_date" {% if secondary_sort == "finance_order_date" %}selected{% endif %}>2nd: Finance oldest</option>
+                <option value="-finance_order_date" {% if secondary_sort == "-finance_order_date" %}selected{% endif %}>2nd: Finance newest</option>
+                <option value="user__name" {% if secondary_sort == "user__name" %}selected{% endif %}>2nd: User A-Z</option>
+                <option value="-user__name" {% if secondary_sort == "-user__name" %}selected{% endif %}>2nd: User Z-A</option>
+            </select>
+        </div>
+
+        <div>
+            <button type="submit">Apply</button>
+        </div>
+
+        <div>
+            <a href="{% url 'orders:order_list' %}">Reset</a>
+        </div>
+    </div>
+</form>
+
+<table border="1" cellpadding="6" cellspacing="0" style="width: 100%; border-collapse: collapse;">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Description</th>
+            <th>User</th>
+            <th>Store</th>
+            <th>Order number</th>
+            <th>Article number</th>
+            <th>Quantity</th>
+            <th>URL</th>
+            <th>Price excl. VAT</th>
+            <th>Delivery days</th>
+            <th>Student remarks</th>
+            <th>Teacher remarks</th>
+            <th>Status</th>
+            <th>Decision reason</th>
+            <th>Decided by</th>
+            <th>Decided at</th>
+            <th>Created</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for order in orders %}
             <tr>
                 <td>{{ order.id }}</td>
-                <td><a href="{% url 'orders:order_detail' order.id %}">{{ order.short_description }}</a></td>
+                <td>
+                    <a href="{% url 'orders:order_detail' order.id %}">{{ order.short_description }}</a>
+                </td>
                 <td>{{ order.user.name }}</td>
                 <td>{{ order.store }}</td>
                 <td>{{ order.ordernumber|default:"-" }}</td>
@@ -142,7 +227,7 @@
                 <td>{{ order.quantity }}</td>
                 <td>
                     {% if order.url %}
-                        <a href="{{ order.url }}" target="_blank">Link</a>
+                        <a href="{{ order.url }}" target="_blank" rel="noopener noreferrer">Link</a>
                     {% else %}
                         -
                     {% endif %}
@@ -169,39 +254,45 @@
                 </td>
                 <td>{{ order.created_at|date:"Y-m-d H:i" }}</td>
                 <td>
-                    {% if user.role == "admin" or user.role == "teacher" %}
-                        {% if user.role == "admin" or order.order_type == "student_order" or order.user_id == user.id %}
-                            <form method="post">
-                                {% csrf_token %}
-                                <input type="hidden" name="update_order_id" value="{{ order.id }}">
-                                <input type="hidden" name="return_query" value="{{ request.GET.urlencode }}">
-                                <select name="decision">
-                                    <option value="submitted" {% if order.status == "submitted" %}selected{% endif %}>Submitted</option>
-                                    <option value="approved" {% if order.status == "approved" %}selected{% endif %}>Approved</option>
-                                    <option value="rejected" {% if order.status == "rejected" %}selected{% endif %}>Rejected</option>
-                                    <option value="rework" {% if order.status == "rework" %}selected{% endif %}>Needs rework</option>
-                                </select>
-                                <textarea name="decision_reason" rows="2">{{ order.decision_reason }}</textarea>
-                                <button type="submit">Update</button>
-                            </form>
-                        {% else %}
-                            -
-                        {% endif %}
-                    {% else %}
-                        {% if order.user_id == user.id and order.status != "approved" and order.status != "rejected" %}
-                            <a href="{% url 'orders:order_edit' order.id %}">Edit</a>
-                        {% else %}
-                            -
-                        {% endif %}
+                    {% if order.can_decide %}
+                        <form method="post" style="margin-bottom: 0.5rem;">
+                            {% csrf_token %}
+                            <input type="hidden" name="update_order_id" value="{{ order.id }}">
+                            <input type="hidden" name="return_query" value="{{ request.GET.urlencode }}">
+
+                            <select name="decision">
+                                <option value="submitted" {% if order.status == "submitted" %}selected{% endif %}>Submitted</option>
+                                <option value="approved" {% if order.status == "approved" %}selected{% endif %}>Approved</option>
+                                <option value="rejected" {% if order.status == "rejected" %}selected{% endif %}>Rejected</option>
+                                <option value="rework" {% if order.status == "rework" %}selected{% endif %}>Needs rework</option>
+                            </select>
+
+                            <input
+                                type="text"
+                                name="decision_reason"
+                                value="{{ order.decision_reason }}"
+                                placeholder="Reason"
+                                style="margin-top: 0.25rem; width: 100%;"
+                            >
+
+                            <button type="submit" style="margin-top: 0.25rem;">Update</button>
+                        </form>
+                    {% endif %}
+
+                    {% if order.can_edit %}
+                        <a href="{% url 'orders:order_edit' order.id %}">Edit</a>
+                    {% endif %}
+
+                    {% if not order.can_decide and not order.can_edit %}
+                        -
                     {% endif %}
                 </td>
             </tr>
-            {% empty %}
+        {% empty %}
             <tr>
                 <td colspan="18">No orders found.</td>
             </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-</form>
+        {% endfor %}
+    </tbody>
+</table>
 {% endblock %}
