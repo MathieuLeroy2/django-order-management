@@ -9,7 +9,12 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 
 from accounts.models import TeacherStudentLink
-from .forms import OrderCreateForm, OrderDecisionForm, OrderEditForm
+from .forms import (
+    AdminInlineOrderUpdateForm,
+    OrderCreateForm,
+    OrderDecisionForm,
+    OrderEditForm,
+)
 from .models import AppSettings, Order
 
 User = get_user_model()
@@ -142,6 +147,27 @@ def order_list(request):
         else:
             messages.error(request, "Could not update the order. Please check the form.")
 
+    if request.method == "POST" and "inline_edit_order_id" in request.POST:
+        order = get_object_or_404(
+            Order.objects.select_related("user", "decided_by"),
+            pk=request.POST.get("inline_edit_order_id"),
+        )
+
+        if request.user.role != User.ROLE_ADMIN:
+            raise Http404("You do not have permission to inline edit this order.")
+
+        form = AdminInlineOrderUpdateForm(request.POST, instance=order)
+        if form.is_valid():
+            form.save()
+            messages.success(request, f"Order {order.id} inline fields were updated successfully.")
+
+            return_query = request.POST.get("return_query", "").strip()
+            if return_query:
+                return redirect(f"{request.path}?{return_query}")
+            return redirect("orders:order_list")
+        else:
+            messages.error(request, f"Could not save inline changes for order {order.id}.")
+
     orders = get_visible_orders_for_user(request.user)
 
     search = request.GET.get("search", "").strip()
@@ -257,6 +283,7 @@ def order_list(request):
     for order in orders:
         order.can_edit = user_can_edit_order(request.user, order)
         order.can_decide = user_can_decide_order(request.user, order)
+        order.can_inline_admin_edit = request.user.role == User.ROLE_ADMIN
 
     context = {
         "orders": orders,

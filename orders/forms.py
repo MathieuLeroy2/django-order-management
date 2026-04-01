@@ -1,4 +1,5 @@
 from django import forms
+
 from .models import Order
 
 
@@ -26,9 +27,6 @@ class OrderBaseForm(forms.ModelForm):
     def __init__(self, *args, user=None, **kwargs):
         super().__init__(*args, **kwargs)
         self.user = user
-
-        if self.user and self.user.role == "student":
-            self.fields.pop("teacher_remarks", None)
 
 
 class OrderCreateForm(OrderBaseForm):
@@ -64,3 +62,22 @@ class OrderDecisionForm(forms.Form):
             )
 
         return cleaned_data
+
+
+class AdminInlineOrderUpdateForm(forms.ModelForm):
+    class Meta:
+        model = Order
+        fields = [
+            "teacher_remarks",
+            "ordernumber",
+            "finance_order_date",
+            "shipped_date",
+            "received_date",
+        ]
+        widgets = {
+            "teacher_remarks": forms.Textarea(attrs={"rows": 2}),
+            "ordernumber": forms.TextInput(),
+            "finance_order_date": forms.DateInput(attrs={"type": "date"}),
+            "shipped_date": forms.DateInput(attrs={"type": "date"}),
+            "received_date": forms.DateInput(attrs={"type": "date"}),
+        }

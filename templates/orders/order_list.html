@@ -240,63 +240,106 @@
                 <td>{{ order.total_price_excl_vat|default:"-" }}</td>
                 <td>{{ order.delivery_time_days|default:"-" }}</td>
                 <td>{{ order.student_remarks|default:"-" }}</td>
-                <td>{{ order.teacher_remarks|default:"-" }}</td>
-                <td>
-                    {% if order.can_decide %}
-                        <form method="post" style="margin-bottom: 0.5rem;">
-                            {% csrf_token %}
-                            <input type="hidden" name="update_order_id" value="{{ order.id }}">
-                            <input type="hidden" name="return_query" value="{{ request.GET.urlencode }}">
 
-                            <select name="decision">
-                                <option value="submitted" {% if order.status == "submitted" %}selected{% endif %}>Submitted</option>
-                                <option value="approved" {% if order.status == "approved" %}selected{% endif %}>Approved</option>
-                                <option value="rejected" {% if order.status == "rejected" %}selected{% endif %}>Rejected</option>
-                                <option value="rework" {% if order.status == "rework" %}selected{% endif %}>Needs rework</option>
-                            </select>
+                {% if order.can_inline_admin_edit %}
+                    <form method="post">
+                        {% csrf_token %}
+                        <input type="hidden" name="inline_edit_order_id" value="{{ order.id }}">
+                        <input type="hidden" name="return_query" value="{{ request.GET.urlencode }}">
 
-                            <input
-                                type="text"
-                                name="decision_reason"
-                                value="{{ order.decision_reason }}"
-                                placeholder="Reason"
-                                style="margin-top: 0.25rem; width: 100%;"
-                            >
+                        <td>
+                            <textarea name="teacher_remarks" rows="2" style="width: 100%;">{{ order.teacher_remarks }}</textarea>
+                        </td>
 
-                            <button type="submit" style="margin-top: 0.25rem;">Update</button>
-                        </form>
-                    {% endif %}
+                        <td>
+                            {% if order.can_decide %}
+                                <div style="margin-bottom: 0.5rem;">
+                                    <input type="hidden" name="update_order_id" disabled>
 
-                    {% if order.can_edit %}
-                        <a href="{% url 'orders:order_edit' order.id %}">Edit</a>
-                    {% endif %}
+                                    <a href="{% url 'orders:order_edit' order.id %}">Edit page</a>
+                                </div>
+                            {% endif %}
 
-                    {% if not order.can_decide and not order.can_edit %}
-                        -
-                    {% endif %}
-                </td>
-                <td>{{ order.ordernumber|default:"-" }}</td>
-                <td>
-                    {% if order.finance_order_date %}
-                        {{ order.finance_order_date|date:"Y-m-d" }}
-                    {% else %}
-                        -
-                    {% endif %}
-                </td>
-                <td>
-                    {% if order.shipped_date %}
-                        {{ order.shipped_date|date:"Y-m-d" }}
-                    {% else %}
-                        -
-                    {% endif %}
-                </td>
-                <td>
-                    {% if order.received_date %}
-                        {{ order.received_date|date:"Y-m-d" }}
-                    {% else %}
-                        -
-                    {% endif %}
-                </td>
+                            <button type="submit">Save inline</button>
+                        </td>
+
+                        <td>
+                            <input type="text" name="ordernumber" value="{{ order.ordernumber }}" style="width: 100%;">
+                        </td>
+
+                        <td>
+                            <input type="date" name="finance_order_date" value="{% if order.finance_order_date %}{{ order.finance_order_date|date:'Y-m-d' }}{% endif %}">
+                        </td>
+
+                        <td>
+                            <input type="date" name="shipped_date" value="{% if order.shipped_date %}{{ order.shipped_date|date:'Y-m-d' }}{% endif %}">
+                        </td>
+
+                        <td>
+                            <input type="date" name="received_date" value="{% if order.received_date %}{{ order.received_date|date:'Y-m-d' }}{% endif %}">
+                        </td>
+                    </form>
+                {% else %}
+                    <td>{{ order.teacher_remarks|default:"-" }}</td>
+
+                    <td>
+                        {% if order.can_decide %}
+                            <form method="post" style="margin-bottom: 0.5rem;">
+                                {% csrf_token %}
+                                <input type="hidden" name="update_order_id" value="{{ order.id }}">
+                                <input type="hidden" name="return_query" value="{{ request.GET.urlencode }}">
+
+                                <select name="decision">
+                                    <option value="submitted" {% if order.status == "submitted" %}selected{% endif %}>Submitted</option>
+                                    <option value="approved" {% if order.status == "approved" %}selected{% endif %}>Approved</option>
+                                    <option value="rejected" {% if order.status == "rejected" %}selected{% endif %}>Rejected</option>
+                                    <option value="rework" {% if order.status == "rework" %}selected{% endif %}>Needs rework</option>
+                                </select>
+
+                                <input
+                                    type="text"
+                                    name="decision_reason"
+                                    value="{{ order.decision_reason }}"
+                                    placeholder="Reason"
+                                    style="margin-top: 0.25rem; width: 100%;"
+                                >
+
+                                <button type="submit" style="margin-top: 0.25rem;">Update</button>
+                            </form>
+                        {% endif %}
+
+                        {% if order.can_edit %}
+                            <a href="{% url 'orders:order_edit' order.id %}">Edit</a>
+                        {% endif %}
+
+                        {% if not order.can_decide and not order.can_edit %}
+                            -
+                        {% endif %}
+                    </td>
+
+                    <td>{{ order.ordernumber|default:"-" }}</td>
+                    <td>
+                        {% if order.finance_order_date %}
+                            {{ order.finance_order_date|date:"Y-m-d" }}
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if order.shipped_date %}
+                            {{ order.shipped_date|date:"Y-m-d" }}
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if order.received_date %}
+                            {{ order.received_date|date:"Y-m-d" }}
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
+                {% endif %}
             </tr>
         {% empty %}
             <tr>
