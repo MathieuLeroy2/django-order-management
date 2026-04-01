@@ -1,6 +1,6 @@
 from django.conf import settings
-from django.db import models
 from django.core.exceptions import ValidationError
+from django.db import models
 
 
 class Order(models.Model):
@@ -34,14 +34,12 @@ class Order(models.Model):
     order_type = models.CharField(max_length=20, choices=ORDER_TYPE_CHOICES)
     store = models.CharField(max_length=255)
     article_number = models.CharField(max_length=100, blank=True)
-
     ordernumber = models.CharField(
         max_length=100,
         blank=True,
         db_index=True,
-        help_text="ERP order number"
+        help_text="ERP order number",
     )
-
     quantity = models.PositiveIntegerField(default=1)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default=STATUS_DRAFT)
     decision_reason = models.TextField(blank=True)
@@ -73,6 +71,30 @@ class Order(models.Model):
 
     def clean(self):
         if self.status in [self.STATUS_REJECTED, self.STATUS_REWORK] and not self.decision_reason:
-            raise ValidationError({
-                "decision_reason": "A reason is required when rejecting an order or requesting rework."
-            })
+            raise ValidationError(
+                {
+                    "decision_reason": "A reason is required when rejecting an order or requesting rework."
+                }
+            )
+
+
+class AppSettings(models.Model):
+    soft_spending_limit = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        null=True,
+        blank=True,
+        help_text="Leave empty to disable the soft spending warning.",
+    )
+
+    def save(self, *args, **kwargs):
+        self.pk = 1
+        super().save(*args, **kwargs)
+
+    @classmethod
+    def get_solo(cls):
+        obj, _ = cls.objects.get_or_create(pk=1)
+        return obj
+
+    def __str__(self):
+        return "Application settings"

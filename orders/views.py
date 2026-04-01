@@ -1,44 +1,81 @@
+from decimal import Decimal
+
 from django.contrib import messages
+from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
-from django.db.models import Q
+from django.db.models import Q, Sum
 from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 
+from accounts.models import TeacherStudentLink
 from .forms import OrderCreateForm, OrderDecisionForm, OrderEditForm
-from .models import Order
-from django.urls import reverse
-from django.contrib.auth import get_user_model
+from .models import AppSettings, Order
+
+User = get_user_model()
+
+
+def get_linked_student_ids_for_teacher(teacher):
+    if teacher.role != User.ROLE_TEACHER:
+        return []
+
+    cached_ids = getattr(teacher, "_linked_student_ids_cache", None)
+    if cached_ids is not None:
+        return cached_ids
+
+    linked_ids = list(
+        TeacherStudentLink.objects.filter(teacher=teacher).values_list("student_id", flat=True)
+    )
+    teacher._linked_student_ids_cache = linked_ids
+    return linked_ids
+
+
+def get_filterable_users_for_user(user):
+    if user.role == User.ROLE_ADMIN:
+        return User.objects.all().order_by("name")
+
+    if user.role == User.ROLE_TEACHER:
+        linked_ids = get_linked_student_ids_for_teacher(user)
+        return User.objects.filter(Q(id=user.id) | Q(id__in=linked_ids)).distinct().order_by("name")
+
+    return User.objects.filter(id=user.id).order_by("name")
 
 
 def get_visible_orders_for_user(user):
-    if user.role == "admin":
-        return Order.objects.select_related("user", "decided_by").all()
+    base_qs = Order.objects.select_related("user", "decided_by")
 
-    if user.role == "teacher":
-        return Order.objects.select_related("user", "decided_by").filter(
-            Q(user=user) | Q(order_type=Order.ORDER_TYPE_STUDENT)
+    if user.role == User.ROLE_ADMIN:
+        return base_qs.all()
+
+    if user.role == User.ROLE_TEACHER:
+        linked_ids = get_linked_student_ids_for_teacher(user)
+        return base_qs.filter(
+            Q(user=user)
+            | Q(user_id__in=linked_ids, order_type=Order.ORDER_TYPE_STUDENT)
         ).distinct()
 
-    return Order.objects.select_related("user", "decided_by").filter(user=user)
+    return base_qs.filter(user=user)
 
 
 def user_can_view_order(user, order):
-    if user.role == "admin":
+    if user.role == User.ROLE_ADMIN:
         return True
 
-    if user.role == "teacher":
-        if order.user_id == user.id:
-            return True
-        if order.order_type == Order.ORDER_TYPE_STUDENT:
-            return True
-        return False
+    if order.user_id == user.id:
+        return True
 
-    return order.user_id == user.id
+    if user.role == User.ROLE_TEACHER:
+        linked_ids = get_linked_student_ids_for_teacher(user)
+        return (
+            order.order_type == Order.ORDER_TYPE_STUDENT
+            and order.user_id in linked_ids
+        )
+
+    return False
 
 
 def user_can_edit_order(user, order):
-    if user.role == "admin":
+    if user.role == User.ROLE_ADMIN:
         return True
 
     if order.user_id != user.id:
@@ -51,17 +88,18 @@ def user_can_edit_order(user, order):
 
 
 def user_can_decide_order(user, order):
-    if user.role == "admin":
+    if user.role == User.ROLE_ADMIN:
         return True
 
-    if user.role != "teacher":
+    if user.role != User.ROLE_TEACHER:
         return False
-
-    if order.order_type == Order.ORDER_TYPE_STUDENT:
-        return True
 
     if order.order_type == Order.ORDER_TYPE_TEACHER and order.user_id == user.id:
         return True
+
+    if order.order_type == Order.ORDER_TYPE_STUDENT:
+        linked_ids = get_linked_student_ids_for_teacher(user)
+        return order.user_id in linked_ids
 
     return False
 
@@ -93,34 +131,17 @@ def order_list(request):
             order.decided_at = timezone.now()
             order.save()
             messages.success(request, f"Order {order.id} was updated successfully.")
-
-            query_string = request.POST.get("return_query", "").strip()
-            redirect_url = reverse("orders:order_list")
-
-            if query_string:
-                redirect_url = f"{redirect_url}?{query_string}"
-
-            return redirect(redirect_url)
+            return redirect("orders:order_list")
         else:
             messages.error(request, "Could not update the order. Please check the form.")
 
     orders = get_visible_orders_for_user(request.user)
 
-    User = get_user_model()
-
-    visible_user_ids = (
-        orders.values_list("user_id", flat=True)
-        .distinct()
-    )
-
-    visible_users = User.objects.filter(id__in=visible_user_ids).order_by("name", "email")
-
     search = request.GET.get("search", "").strip()
     status_filter = request.GET.get("status", "").strip()
     store_filter = request.GET.get("store", "").strip()
-    user_filter = request.GET.get("user_filter", "").strip()
     ordernumber_filter = request.GET.get("ordernumber", "").strip()
-    ordernumber_presence_filter = request.GET.get("ordernumber_presence_filter", "").strip()
+    user_filter = request.GET.get("user_id", "").strip()
     finance_order_date_filter = request.GET.get("finance_order_date_filter", "").strip()
     shipped_date_filter = request.GET.get("shipped_date_filter", "").strip()
     received_date_filter = request.GET.get("received_date_filter", "").strip()
@@ -147,16 +168,11 @@ def order_list(request):
     if store_filter:
         orders = orders.filter(store__icontains=store_filter)
 
-    if user_filter:
-        orders = orders.filter(user_id=user_filter)
-
     if ordernumber_filter:
         orders = orders.filter(ordernumber=ordernumber_filter)
 
-    if ordernumber_presence_filter == "empty":
-        orders = orders.filter(ordernumber="")
-    elif ordernumber_presence_filter == "filled":
-        orders = orders.exclude(ordernumber="")
+    if user_filter:
+        orders = orders.filter(user_id=user_filter)
 
     if finance_order_date_filter == "empty":
         orders = orders.filter(finance_order_date__isnull=True)
@@ -204,21 +220,54 @@ def order_list(request):
     else:
         orders = orders.order_by(primary_sort_value, secondary_sort_value)
 
+    settings_obj = AppSettings.get_solo()
+    filterable_users = get_filterable_users_for_user(request.user)
+
+    visible_total = orders.aggregate(total=Sum("total_price_excl_vat"))["total"] or Decimal("0.00")
+
+    totals_by_user_id = {
+        row["user_id"]: (row["total"] or Decimal("0.00"))
+        for row in orders.values("user_id").annotate(total=Sum("total_price_excl_vat"))
+    }
+
+    spending_rows = []
+    for visible_user in filterable_users:
+        requested_total = totals_by_user_id.get(visible_user.id, Decimal("0.00"))
+        is_over_limit = (
+            settings_obj.soft_spending_limit is not None
+            and requested_total > settings_obj.soft_spending_limit
+        )
+
+        spending_rows.append(
+            {
+                "user": visible_user,
+                "requested_total": requested_total,
+                "is_over_limit": is_over_limit,
+            }
+        )
+
+    orders = list(orders)
+    for order in orders:
+        order.can_edit = user_can_edit_order(request.user, order)
+        order.can_decide = user_can_decide_order(request.user, order)
+
     context = {
         "orders": orders,
         "search": search,
         "status_filter": status_filter,
         "store_filter": store_filter,
-        "user_filter": user_filter,
-        "visible_users": visible_users,
         "ordernumber_filter": ordernumber_filter,
-        "ordernumber_presence_filter": ordernumber_presence_filter,
+        "user_filter": user_filter,
         "finance_order_date_filter": finance_order_date_filter,
         "shipped_date_filter": shipped_date_filter,
         "received_date_filter": received_date_filter,
         "primary_sort": primary_sort,
         "secondary_sort": secondary_sort,
         "status_choices": Order.STATUS_CHOICES,
+        "user_choices": filterable_users,
+        "visible_total": visible_total,
+        "soft_spending_limit": settings_obj.soft_spending_limit,
+        "spending_rows": spending_rows,
     }
     return render(request, "orders/order_list.html", context)
 
@@ -250,7 +299,7 @@ def order_create(request):
             order.user = request.user
             order.status = Order.STATUS_SUBMITTED
 
-            if request.user.role == "student":
+            if request.user.role == User.ROLE_STUDENT:
                 order.order_type = Order.ORDER_TYPE_STUDENT
             else:
                 order.order_type = Order.ORDER_TYPE_TEACHER
@@ -323,12 +372,14 @@ def order_decide(request, order_id):
     else:
         form = OrderDecisionForm(
             initial={
-                "decision": order.status if order.status in [
+                "decision": order.status
+                if order.status in [
                     Order.STATUS_SUBMITTED,
                     Order.STATUS_APPROVED,
                     Order.STATUS_REJECTED,
                     Order.STATUS_REWORK,
-                ] else Order.STATUS_SUBMITTED,
+                ]
+                else Order.STATUS_SUBMITTED,
                 "decision_reason": order.decision_reason,
             }
         )

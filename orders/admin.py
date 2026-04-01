@@ -1,5 +1,6 @@
 from django.contrib import admin
-from .models import Order
+
+from .models import AppSettings, Order
 
 
 @admin.register(Order)
@@ -27,3 +28,14 @@ class OrderAdmin(admin.ModelAdmin):
     )
     autocomplete_fields = ("user", "decided_by")
     readonly_fields = ("created_at",)
+
+
+@admin.register(AppSettings)
+class AppSettingsAdmin(admin.ModelAdmin):
+    list_display = ("soft_spending_limit",)
+
+    def has_add_permission(self, request):
+        return not AppSettings.objects.exists()
+
+    def has_delete_permission(self, request, obj=None):
+        return False
