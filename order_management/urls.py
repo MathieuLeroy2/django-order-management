@@ -1,20 +1,23 @@
 from django.contrib import admin
-from django.urls import path, include
+from django.urls import path, include, reverse
 from django.shortcuts import redirect
+from allauth.account.views import LogoutView
 
 
 def login_redirect(request):
-    return redirect("/accounts/oidc/authentik/login/")
+    return redirect(reverse("openid_connect_login", kwargs={"provider_id": "authentik"}))
 
 
 urlpatterns = [
     path("admin/", admin.site.urls),
 
-    # Keep the normal Django login URL, but immediately send users to Authentik.
+    # Keep old names used by templates
     path("accounts/login/", login_redirect, name="login"),
+    path("accounts/logout/", LogoutView.as_view(), name="logout"),
 
-    # allauth provides the OIDC login/callback/logout routes.
+    # allauth routes
     path("accounts/", include("allauth.urls")),
 
+    # app routes
     path("", include("orders.urls")),
 ]
