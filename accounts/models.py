@@ -15,20 +15,13 @@ class User(AbstractUser):
         (ROLE_STUDENT, "Student"),
     ]
 
-    email = models.EmailField(blank=True, null=True, unique=True)
-    name = models.CharField(max_length=255)
+    email = models.EmailField(blank=True)
+    name = models.CharField(max_length=255, blank=True)
     role = models.CharField(max_length=20, choices=ROLE_CHOICES, default=ROLE_STUDENT)
 
-    USERNAME_FIELD = "username"
-    REQUIRED_FIELDS = ["name"]
-
-    def save(self, *args, **kwargs):
-        if self.email == "":
-            self.email = None
-        super().save(*args, **kwargs)
-
     def __str__(self):
-        return f"{self.name} ({self.username})"
+        display_name = self.name or self.get_full_name() or self.username
+        return f"{display_name} ({self.username})"
 
 
 class TeacherStudentLink(models.Model):

@@ -7,18 +7,19 @@ from .models import TeacherStudentLink, User
 @admin.register(User)
 class CustomUserAdmin(UserAdmin):
     model = User
-
-    list_display = ("username", "name", "email", "role", "is_staff", "is_active")
+    list_display = ("username", "email", "name", "role", "is_staff", "is_active")
     list_filter = ("role", "is_staff", "is_active")
-    search_fields = ("username", "name", "email")
+    search_fields = ("username", "email", "name")
     ordering = ("username",)
 
-    fieldsets = UserAdmin.fieldsets + (
+    fieldsets = (
+        *UserAdmin.fieldsets,
         ("Custom Fields", {"fields": ("name", "role")}),
     )
 
-    add_fieldsets = UserAdmin.add_fieldsets + (
-        ("Custom Fields", {"fields": ("name", "role", "email")}),
+    add_fieldsets = (
+        *UserAdmin.add_fieldsets,
+        ("Custom Fields", {"fields": ("email", "name", "role")}),
     )
 
 

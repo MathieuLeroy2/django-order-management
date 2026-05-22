@@ -29,6 +29,10 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "allauth",
+    "allauth.account",
+    "allauth.socialaccount",
+    "allauth.socialaccount.providers.openid_connect",
     "accounts",
     "orders",
 ]
@@ -37,11 +41,11 @@ AUTH_USER_MODEL = "accounts.User"
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
-    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "allauth.account.middleware.AccountMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
@@ -86,6 +90,43 @@ AUTH_PASSWORD_VALIDATORS = [
         "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
     },
 ]
+
+
+SITE_ID = 1
+
+AUTHENTICATION_BACKENDS = [
+    "django.contrib.auth.backends.ModelBackend",
+    "allauth.account.auth_backends.AuthenticationBackend",
+]
+
+LOGIN_REDIRECT_URL = "/"
+LOGOUT_REDIRECT_URL = "/"
+
+ACCOUNT_EMAIL_VERIFICATION = "none"
+ACCOUNT_USERNAME_REQUIRED = True
+ACCOUNT_EMAIL_REQUIRED = False
+
+SOCIALACCOUNT_AUTO_SIGNUP = True
+SOCIALACCOUNT_ONLY = True
+
+SOCIALACCOUNT_ADAPTER = "accounts.adapters.AuthentikSocialAccountAdapter"
+
+SOCIALACCOUNT_PROVIDERS = {
+    "openid_connect": {
+        "APPS": [
+            {
+                "provider_id": "authentik",
+                "name": "Authentik",
+                "client_id": os.environ.get("AUTHENTIK_CLIENT_ID"),
+                "secret": os.environ.get("AUTHENTIK_CLIENT_SECRET"),
+                "settings": {
+                    "server_url": os.environ.get("AUTHENTIK_SERVER_URL"),
+                },
+            }
+        ]
+    }
+}
+
 
 LANGUAGE_CODE = "en-us"
 TIME_ZONE = "UTC"
