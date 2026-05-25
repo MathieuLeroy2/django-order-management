@@ -1,4 +1,5 @@
 from decimal import Decimal
+from urllib import request
 
 from django.contrib import messages
 from django.contrib.auth import get_user_model
@@ -184,9 +185,21 @@ def order_list(request):
 
         if request.user.role != User.ROLE_ADMIN:
             raise Http404("You do not have permission to inline edit this order.")
+        
+        admin_action = request.POST.get("admin_action", "").strip()
+
+        if admin_action == "delete_order":
+            order_id = order.id
+            order.delete()
+            messages.success(request, f"Order {order_id} was deleted successfully.")
+
+            return_query = request.POST.get("return_query", "").strip()
+            if return_query:
+                return redirect(f"{request.path}?{return_query}")
+            return redirect("orders:order_list")
 
         form = AdminInlineOrderUpdateForm(request.POST, instance=order)
-        
+
         if form.is_valid():
             order = form.save(commit=False)
 
