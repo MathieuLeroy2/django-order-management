@@ -10,6 +10,9 @@ services:
       DJANGO_ALLOWED_HOSTS: "localhost,127.0.0.1"
       DJANGO_CSRF_TRUSTED_ORIGINS: "http://localhost:8000"
       DJANGO_SQLITE_PATH: "/data/db.sqlite3"
+      AUTHENTIK_CLIENT_ID: "replace-this-with-authentik-client-id"
+      AUTHENTIK_CLIENT_SECRET: "replace-this-with-authentik-client-secret"
+      AUTHENTIK_SERVER_URL: "replace-this-with-authentik-server-url"
     volumes:
       - django_order_data:/data
     restart: unless-stopped
