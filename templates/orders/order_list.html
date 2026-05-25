@@ -229,6 +229,9 @@
             <th>Shipped date</th>
             <th>Received date</th>
             <th>Created at</th>
+            {% if request.user.role == "admin" %}
+                <th>Accepted/rejected at</th>
+            {% endif %}
         </tr>
     </thead>
     <tbody>
@@ -365,10 +368,23 @@
                     </td>
                     <td>{{ order.created_at|date:"Y-m-d H:i" }}</td>
                 {% endif %}
+                {% if request.user.role == "admin" %}
+                    <td>
+                        {% if order.status == "approved" or order.status == "rejected" %}
+                            {% if order.decided_at %}
+                                {{ order.decided_at|date:"Y-m-d H:i" }}
+                            {% else %}
+                                -
+                            {% endif %}
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
+                {% endif %}
             </tr>
         {% empty %}
             <tr>
-                <td colspan="17">No orders found.</td>
+                <td colspan="18">No orders found.</td>
             </tr>
         {% endfor %}
     </tbody>
