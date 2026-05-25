@@ -279,11 +279,27 @@
                         <td>
                             {% if order.can_decide %}
                                 <div style="margin-bottom: 0.5rem;">
-                                    <input type="hidden" name="update_order_id" disabled>
+                                    <label>Status</label><br>
+                                    <select name="decision">
+                                        <option value="submitted" {% if order.status == "submitted" %}selected{% endif %}>Submitted</option>
+                                        <option value="approved" {% if order.status == "approved" %}selected{% endif %}>Approved</option>
+                                        <option value="rejected" {% if order.status == "rejected" %}selected{% endif %}>Rejected</option>
+                                        <option value="rework" {% if order.status == "rework" %}selected{% endif %}>Needs rework</option>
+                                    </select>
 
-                                    <a href="{% url 'orders:order_edit' order.id %}">Edit page</a>
+                                    <input
+                                        type="text"
+                                        name="decision_reason"
+                                        value="{{ order.decision_reason }}"
+                                        placeholder="Reason"
+                                        style="margin-top: 0.25rem; width: 100%;"
+                                    >
                                 </div>
                             {% endif %}
+
+                            <div style="margin-bottom: 0.5rem;">
+                                <a href="{% url 'orders:order_edit' order.id %}">Edit page</a>
+                            </div>
 
                             <button type="submit">Save inline</button>
                         </td>
