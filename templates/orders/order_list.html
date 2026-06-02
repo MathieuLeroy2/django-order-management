@@ -308,22 +308,8 @@
                                         style="margin-top: 0.25rem; width: 100%;"
                                     >
 
-                                    <div style="margin-top: 0.75rem;">
-                                        <select style="width: 100%;">
-                                            <option value="">No extra action</option>
-                                            <option value="delete_order">Delete this order permanently</option>
-                                        </select>
-                                    </div>
                                 </div>
                             {% endif %}
-
-                            <div style="margin-bottom: 0.5rem;">
-                                <a href="{% url 'orders:order_edit' order.id %}">Edit page</a>
-                            </div>
-
-                            <div style="margin-bottom: 0.5rem;">
-                                <a href="{% url 'orders:order_edit' order.id %}">Edit page</a>
-                            </div>
 
                             <button type="submit">Save inline</button>
                         </td>
