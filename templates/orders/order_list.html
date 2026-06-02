@@ -175,8 +175,8 @@
                 <option value="-finance_order_date" {% if primary_sort == "-finance_order_date" %}selected{% endif %}>Officially ordered newest</option>
                 <option value="shipped_date" {% if primary_sort == "shipped_date" %}selected{% endif %}>Shipped oldest</option>
                 <option value="-shipped_date" {% if primary_sort == "-shipped_date" %}selected{% endif %}>Shipped newest</option>
-                <option value="received_date" {% if primary_sort == "received_date" %}selected{% endif %}>Expected oldest</option>
-                <option value="-received_date" {% if primary_sort == "-received_date" %}selected{% endif %}>Expected newest</option>
+                <option value="received_date" {% if primary_sort == "received_date" %}selected{% endif %}>Delivered oldest</option>
+                <option value="-received_date" {% if primary_sort == "-received_date" %}selected{% endif %}>Delivered newest</option>
                 <option value="user__name" {% if primary_sort == "user__name" %}selected{% endif %}>User A-Z</option>
                 <option value="-user__name" {% if primary_sort == "-user__name" %}selected{% endif %}>User Z-A</option>
             </select>
@@ -201,8 +201,8 @@
                 <option value="-finance_order_date" {% if secondary_sort == "-finance_order_date" %}selected{% endif %}>2nd: Officially ordered newest</option>
                 <option value="shipped_date" {% if secondary_sort == "shipped_date" %}selected{% endif %}>2nd: Shipped oldest</option>
                 <option value="-shipped_date" {% if secondary_sort == "-shipped_date" %}selected{% endif %}>2nd: Shipped newest</option>
-                <option value="received_date" {% if secondary_sort == "received_date" %}selected{% endif %}>2nd: Expected oldest</option>
-                <option value="-received_date" {% if secondary_sort == "-received_date" %}selected{% endif %}>2nd: Expected newest</option>
+                <option value="received_date" {% if secondary_sort == "received_date" %}selected{% endif %}>2nd: Delivered oldest</option>
+                <option value="-received_date" {% if secondary_sort == "-received_date" %}selected{% endif %}>2nd: Delivered newest</option>
                 <option value="user__name" {% if secondary_sort == "user__name" %}selected{% endif %}>2nd: User A-Z</option>
                 <option value="-user__name" {% if secondary_sort == "-user__name" %}selected{% endif %}>2nd: User Z-A</option>
             </select>
@@ -236,7 +236,7 @@
             <th>Order number</th>
             <th>Officially ordered</th>
             <th>Shipped</th>
-            <th>Expected</th>
+            <th>Delivered</th>
             <th>Created at</th>
             {% if request.user.role == "admin" %}
                 <th>Accepted/rejected at</th>
