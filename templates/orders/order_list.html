@@ -116,7 +116,7 @@
         </div>
 
         <div>
-            <label for="finance_order_date_filter">Finance</label><br>
+            <label for="finance_order_date_filter">Order nr</label><br>
             <select name="finance_order_date_filter" id="finance_order_date_filter">
                 <option value="">All</option>
                 <option value="empty" {% if finance_order_date_filter == "empty" %}selected{% endif %}>Empty</option>
@@ -225,10 +225,13 @@
             <th>Teacher remarks</th>
             <th>Actions</th>
             <th>Order number</th>
-            <th>Finance order date</th>
+            <th>Order date</th>
             <th>Shipped date</th>
             <th>Received date</th>
             <th>Created at</th>
+            {% if request.user.role == "admin" %}
+                <th>Accepted/rejected at</th>
+            {% endif %}
         </tr>
     </thead>
     <tbody>
@@ -276,11 +279,34 @@
                         <td>
                             {% if order.can_decide %}
                                 <div style="margin-bottom: 0.5rem;">
-                                    <input type="hidden" name="update_order_id" disabled>
+                                    <label>Status</label><br>
+                                    <select name="decision">
+                                        <option value="submitted" {% if order.status == "submitted" %}selected{% endif %}>Submitted</option>
+                                        <option value="approved" {% if order.status == "approved" %}selected{% endif %}>Approved</option>
+                                        <option value="rejected" {% if order.status == "rejected" %}selected{% endif %}>Rejected</option>
+                                        <option value="rework" {% if order.status == "rework" %}selected{% endif %}>Needs rework</option>
+                                    </select>
 
-                                    <a href="{% url 'orders:order_edit' order.id %}">Edit page</a>
+                                    <input
+                                        type="text"
+                                        name="decision_reason"
+                                        value="{{ order.decision_reason }}"
+                                        placeholder="Reason"
+                                        style="margin-top: 0.25rem; width: 100%;"
+                                    >
+
+                                    <div style="margin-top: 0.75rem;">
+                                        <select style="width: 100%;">
+                                            <option value="">No extra action</option>
+                                            <option value="delete_order">Delete this order permanently</option>
+                                        </select>
+                                    </div>
                                 </div>
                             {% endif %}
+
+                            <div style="margin-bottom: 0.5rem;">
+                                <a href="{% url 'orders:order_edit' order.id %}">Edit page</a>
+                            </div>
 
                             <button type="submit">Save inline</button>
                         </td>
@@ -365,10 +391,23 @@
                     </td>
                     <td>{{ order.created_at|date:"Y-m-d H:i" }}</td>
                 {% endif %}
+                {% if request.user.role == "admin" %}
+                    <td>
+                        {% if order.status == "approved" or order.status == "rejected" %}
+                            {% if order.decided_at %}
+                                {{ order.decided_at|date:"Y-m-d H:i" }}
+                            {% else %}
+                                -
+                            {% endif %}
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
+                {% endif %}
             </tr>
         {% empty %}
             <tr>
-                <td colspan="17">No orders found.</td>
+                <td colspan="18">No orders found.</td>
             </tr>
         {% endfor %}
     </tbody>

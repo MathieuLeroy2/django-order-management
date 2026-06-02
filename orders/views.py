@@ -1,4 +1,5 @@
 from decimal import Decimal
+from urllib import request
 
 from django.contrib import messages
 from django.contrib.auth import get_user_model
@@ -184,16 +185,60 @@ def order_list(request):
 
         if request.user.role != User.ROLE_ADMIN:
             raise Http404("You do not have permission to inline edit this order.")
+        
+        admin_action = request.POST.get("admin_action", "").strip()
 
-        form = AdminInlineOrderUpdateForm(request.POST, instance=order)
-        if form.is_valid():
-            form.save()
-            messages.success(request, f"Order {order.id} inline fields were updated successfully.")
+        if admin_action == "delete_order":
+            order_id = order.id
+            order.delete()
+            messages.success(request, f"Order {order_id} was deleted successfully.")
 
             return_query = request.POST.get("return_query", "").strip()
             if return_query:
                 return redirect(f"{request.path}?{return_query}")
             return redirect("orders:order_list")
+
+        form = AdminInlineOrderUpdateForm(request.POST, instance=order)
+
+        if form.is_valid():
+            order = form.save(commit=False)
+
+            decision = request.POST.get("decision")
+            decision_reason = request.POST.get("decision_reason", "").strip()
+
+            if decision in [
+                Order.STATUS_SUBMITTED,
+                Order.STATUS_APPROVED,
+                Order.STATUS_REJECTED,
+                Order.STATUS_REWORK,
+            ]:
+                if decision == Order.STATUS_SUBMITTED and order.is_store_blacklisted():
+                    messages.error(
+                        request,
+                        f"Order {order.id} uses a blacklisted store and cannot be submitted."
+                    )
+                else:
+                    order.status = decision
+                    order.decision_reason = decision_reason
+
+                    if decision in [Order.STATUS_APPROVED, Order.STATUS_REJECTED]:
+                        order.decided_by = request.user
+                        order.decided_at = timezone.now()
+                    else:
+                        order.decided_by = None
+                        order.decided_at = None
+
+                    order.save()
+                    messages.success(request, f"Order {order.id} was updated successfully.")
+            else:
+                order.save()
+                messages.success(request, f"Order {order.id} inline fields were updated successfully.")
+
+            return_query = request.POST.get("return_query", "").strip()
+            if return_query:
+                return redirect(f"{request.path}?{return_query}")
+            return redirect("orders:order_list")
+
         else:
             messages.error(request, f"Could not save inline changes for order {order.id}.")
 

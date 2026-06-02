@@ -6,13 +6,16 @@ services:
       - "80:8000"
     environment:
       DJANGO_DEBUG: "False"
-      DJANGO_SECRET_KEY: "replace-this-with-a-long-random-secret"
-      DJANGO_ALLOWED_HOSTS: "localhost,127.0.0.1"
-      DJANGO_CSRF_TRUSTED_ORIGINS: "http://localhost:8000"
+      DJANGO_SECRET_KEY: "SECRET"
+      DJANGO_ALLOWED_HOSTS: "bestellingen.voltlab.net"
+      DJANGO_CSRF_TRUSTED_ORIGINS: "https://bestellingen.voltlab.net"
       DJANGO_SQLITE_PATH: "/data/db.sqlite3"
+      AUTHENTIK_CLIENT_ID: "SECRET"
+      AUTHENTIK_CLIENT_SECRET: "SECRET"
+      AUTHENTIK_SERVER_URL: "https://auth.voltlab.net/application/o/bestellingen-noord"
     volumes:
-      - django_order_data:/data
+      - django_order_data-test:/data
     restart: unless-stopped
 
 volumes:
-  django_order_data:
+  django_order_data-test:
