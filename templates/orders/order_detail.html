@@ -154,7 +154,7 @@
                 <div class="order-label">Order number</div>
                 <div class="order-value">{{ order.ordernumber|default:"-" }}</div>
 
-                <div class="order-label">Finance order date</div>
+                <div class="order-label">Officially ordered</div>
                 <div class="order-value">
                     {% if order.finance_order_date %}
                         {{ order.finance_order_date|date:"Y-m-d" }}
@@ -163,7 +163,7 @@
                     {% endif %}
                 </div>
 
-                <div class="order-label">Shipped date</div>
+                <div class="order-label">Shipped</div>
                 <div class="order-value">
                     {% if order.shipped_date %}
                         {{ order.shipped_date|date:"Y-m-d" }}
@@ -172,7 +172,7 @@
                     {% endif %}
                 </div>
 
-                <div class="order-label">Received date</div>
+                <div class="order-label">Expected</div>
                 <div class="order-value">
                     {% if order.received_date %}
                         {{ order.received_date|date:"Y-m-d" }}

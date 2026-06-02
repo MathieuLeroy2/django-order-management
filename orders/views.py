@@ -203,6 +203,14 @@ def order_list(request):
         if form.is_valid():
             order = form.save(commit=False)
 
+            if request.POST.get("inline_autosave") == "1":
+                order.save()
+
+                return_query = request.POST.get("return_query", "").strip()
+                if return_query:
+                    return redirect(f"{request.path}?{return_query}")
+                return redirect("orders:order_list")
+
             decision = request.POST.get("decision")
             decision_reason = request.POST.get("decision_reason", "").strip()
 

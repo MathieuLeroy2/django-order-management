@@ -102,6 +102,11 @@ class AdminOrderEditForm(forms.ModelForm):
             "purchase_request_number",
             "decision_reason",
         ]
+        labels = {
+            "finance_order_date": "Officially ordered",
+            "shipped_date": "Shipped",
+            "received_date": "Expected",
+        }
         widgets = {
             "store": forms.TextInput(
                 attrs={
@@ -114,9 +119,15 @@ class AdminOrderEditForm(forms.ModelForm):
             "student_remarks": forms.Textarea(attrs={"rows": 4}),
             "teacher_remarks": forms.Textarea(attrs={"rows": 4}),
             "decision_reason": forms.Textarea(attrs={"rows": 3}),
-            "finance_order_date": forms.DateInput(attrs={"type": "date"}),
-            "shipped_date": forms.DateInput(attrs={"type": "date"}),
-            "received_date": forms.DateInput(attrs={"type": "date"}),
+            "finance_order_date": forms.DateInput(
+                attrs={"type": "date", "autocomplete": "off"}
+            ),
+            "shipped_date": forms.DateInput(
+                attrs={"type": "date", "autocomplete": "off"}
+            ),
+            "received_date": forms.DateInput(
+                attrs={"type": "date", "autocomplete": "off"}
+            ),
         }
 
     def __init__(self, *args, user=None, **kwargs):
@@ -191,10 +202,21 @@ class AdminInlineOrderUpdateForm(forms.ModelForm):
             "shipped_date",
             "received_date",
         ]
+        labels = {
+            "finance_order_date": "Officially ordered",
+            "shipped_date": "Shipped",
+            "received_date": "Expected",
+        }
         widgets = {
             "teacher_remarks": forms.Textarea(attrs={"rows": 2}),
             "ordernumber": forms.TextInput(),
-            "finance_order_date": forms.DateInput(attrs={"type": "date"}),
-            "shipped_date": forms.DateInput(attrs={"type": "date"}),
-            "received_date": forms.DateInput(attrs={"type": "date"}),
+            "finance_order_date": forms.DateInput(
+                attrs={"type": "date", "autocomplete": "off"}
+            ),
+            "shipped_date": forms.DateInput(
+                attrs={"type": "date", "autocomplete": "off"}
+            ),
+            "received_date": forms.DateInput(
+                attrs={"type": "date", "autocomplete": "off"}
+            ),
         }

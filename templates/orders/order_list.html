@@ -125,7 +125,7 @@
         </div>
 
         <div>
-            <label for="finance_order_date_filter">Order date status</label><br>
+            <label for="finance_order_date_filter">Officially ordered</label><br>
             <select name="finance_order_date_filter" id="finance_order_date_filter">
                 <option value="">All</option>
                 <option value="empty" {% if finance_order_date_filter == "empty" %}selected{% endif %}>Empty</option>
@@ -143,7 +143,7 @@
         </div>
 
         <div>
-            <label for="received_date_filter">Received</label><br>
+            <label for="received_date_filter">Arrived</label><br>
             <select name="received_date_filter" id="received_date_filter">
                 <option value="">All</option>
                 <option value="empty" {% if received_date_filter == "empty" %}selected{% endif %}>Empty</option>
@@ -171,12 +171,12 @@
                 <option value="-quantity" {% if primary_sort == "-quantity" %}selected{% endif %}>Quantity high-low</option>
                 <option value="total_price_excl_vat" {% if primary_sort == "total_price_excl_vat" %}selected{% endif %}>Price low-high</option>
                 <option value="-total_price_excl_vat" {% if primary_sort == "-total_price_excl_vat" %}selected{% endif %}>Price high-low</option>
-                <option value="finance_order_date" {% if primary_sort == "finance_order_date" %}selected{% endif %}>Finance oldest</option>
-                <option value="-finance_order_date" {% if primary_sort == "-finance_order_date" %}selected{% endif %}>Finance newest</option>
+                <option value="finance_order_date" {% if primary_sort == "finance_order_date" %}selected{% endif %}>Officially ordered oldest</option>
+                <option value="-finance_order_date" {% if primary_sort == "-finance_order_date" %}selected{% endif %}>Officially ordered newest</option>
                 <option value="shipped_date" {% if primary_sort == "shipped_date" %}selected{% endif %}>Shipped oldest</option>
                 <option value="-shipped_date" {% if primary_sort == "-shipped_date" %}selected{% endif %}>Shipped newest</option>
-                <option value="received_date" {% if primary_sort == "received_date" %}selected{% endif %}>Received oldest</option>
-                <option value="-received_date" {% if primary_sort == "-received_date" %}selected{% endif %}>Received newest</option>
+                <option value="received_date" {% if primary_sort == "received_date" %}selected{% endif %}>Expected oldest</option>
+                <option value="-received_date" {% if primary_sort == "-received_date" %}selected{% endif %}>Expected newest</option>
                 <option value="user__name" {% if primary_sort == "user__name" %}selected{% endif %}>User A-Z</option>
                 <option value="-user__name" {% if primary_sort == "-user__name" %}selected{% endif %}>User Z-A</option>
             </select>
@@ -197,12 +197,12 @@
                 <option value="-quantity" {% if secondary_sort == "-quantity" %}selected{% endif %}>2nd: Quantity high-low</option>
                 <option value="total_price_excl_vat" {% if secondary_sort == "total_price_excl_vat" %}selected{% endif %}>2nd: Price low-high</option>
                 <option value="-total_price_excl_vat" {% if secondary_sort == "-total_price_excl_vat" %}selected{% endif %}>2nd: Price high-low</option>
-                <option value="finance_order_date" {% if secondary_sort == "finance_order_date" %}selected{% endif %}>2nd: Finance oldest</option>
-                <option value="-finance_order_date" {% if secondary_sort == "-finance_order_date" %}selected{% endif %}>2nd: Finance newest</option>
+                <option value="finance_order_date" {% if secondary_sort == "finance_order_date" %}selected{% endif %}>2nd: Officially ordered oldest</option>
+                <option value="-finance_order_date" {% if secondary_sort == "-finance_order_date" %}selected{% endif %}>2nd: Officially ordered newest</option>
                 <option value="shipped_date" {% if secondary_sort == "shipped_date" %}selected{% endif %}>2nd: Shipped oldest</option>
                 <option value="-shipped_date" {% if secondary_sort == "-shipped_date" %}selected{% endif %}>2nd: Shipped newest</option>
-                <option value="received_date" {% if secondary_sort == "received_date" %}selected{% endif %}>2nd: Received oldest</option>
-                <option value="-received_date" {% if secondary_sort == "-received_date" %}selected{% endif %}>2nd: Received newest</option>
+                <option value="received_date" {% if secondary_sort == "received_date" %}selected{% endif %}>2nd: Expected oldest</option>
+                <option value="-received_date" {% if secondary_sort == "-received_date" %}selected{% endif %}>2nd: Expected newest</option>
                 <option value="user__name" {% if secondary_sort == "user__name" %}selected{% endif %}>2nd: User A-Z</option>
                 <option value="-user__name" {% if secondary_sort == "-user__name" %}selected{% endif %}>2nd: User Z-A</option>
             </select>
@@ -234,17 +234,14 @@
             <th>Teacher remarks</th>
             <th>Actions</th>
             <th>Order number</th>
-            <th>Order date</th>
-            <th>Order date</th>
-            <th>Shipped date</th>
-            <th>Received date</th>
+            <th>Officially ordered</th>
+            <th>Shipped</th>
+            <th>Expected</th>
             <th>Created at</th>
             {% if request.user.role == "admin" %}
                 <th>Accepted/rejected at</th>
             {% endif %}
-            {% if request.user.role == "admin" %}
-                <th>Accepted/rejected at</th>
-            {% endif %}
+
         </tr>
     </thead>
     <tbody>
@@ -280,58 +277,58 @@
                 <td>{{ order.student_remarks|default:"-" }}</td>
 
                 {% if order.can_inline_admin_edit %}
-                    <form method="post">
-                        {% csrf_token %}
-                        <input type="hidden" name="inline_edit_order_id" value="{{ order.id }}">
-                        <input type="hidden" name="return_query" value="{{ request.GET.urlencode }}">
+                    <td>
+                        <form id="inline-order-form-{{ order.id }}" method="post">
+                            {% csrf_token %}
+                            <input type="hidden" name="inline_edit_order_id" value="{{ order.id }}">
+                            <input type="hidden" name="return_query" value="{{ request.GET.urlencode }}">
+                            <textarea name="teacher_remarks" rows="2" style="width: 100%;" data-inline-autosave>{{ order.teacher_remarks }}</textarea>
+                        </form>
+                    </td>
 
-                        <td>
-                            <textarea name="teacher_remarks" rows="2" style="width: 100%;">{{ order.teacher_remarks }}</textarea>
-                        </td>
+                    <td>
+                        {% if order.can_decide %}
+                            <div style="margin-bottom: 0.5rem;">
+                                <label>Status</label><br>
+                                <select name="decision" form="inline-order-form-{{ order.id }}">
+                                    <option value="submitted" {% if order.status == "submitted" %}selected{% endif %}>Submitted</option>
+                                    <option value="approved" {% if order.status == "approved" %}selected{% endif %}>Approved</option>
+                                    <option value="rejected" {% if order.status == "rejected" %}selected{% endif %}>Rejected</option>
+                                    <option value="rework" {% if order.status == "rework" %}selected{% endif %}>Needs rework</option>
+                                </select>
 
-                        <td>
-                            {% if order.can_decide %}
-                                <div style="margin-bottom: 0.5rem;">
-                                    <label>Status</label><br>
-                                    <select name="decision">
-                                        <option value="submitted" {% if order.status == "submitted" %}selected{% endif %}>Submitted</option>
-                                        <option value="approved" {% if order.status == "approved" %}selected{% endif %}>Approved</option>
-                                        <option value="rejected" {% if order.status == "rejected" %}selected{% endif %}>Rejected</option>
-                                        <option value="rework" {% if order.status == "rework" %}selected{% endif %}>Needs rework</option>
-                                    </select>
+                                <input
+                                    type="text"
+                                    name="decision_reason"
+                                    value="{{ order.decision_reason }}"
+                                    placeholder="Reason"
+                                    style="margin-top: 0.25rem; width: 100%;"
+                                    form="inline-order-form-{{ order.id }}"
+                                >
 
-                                    <input
-                                        type="text"
-                                        name="decision_reason"
-                                        value="{{ order.decision_reason }}"
-                                        placeholder="Reason"
-                                        style="margin-top: 0.25rem; width: 100%;"
-                                    >
+                            </div>
+                        {% endif %}
 
-                                </div>
-                            {% endif %}
+                        <button type="submit" form="inline-order-form-{{ order.id }}">Save inline</button>
+                    </td>
 
-                            <button type="submit">Save inline</button>
-                        </td>
+                    <td>
+                        <input type="text" name="ordernumber" value="{{ order.ordernumber }}" style="width: 100%;" autocomplete="off" form="inline-order-form-{{ order.id }}" data-inline-autosave>
+                    </td>
 
-                        <td>
-                            <input type="text" name="ordernumber" value="{{ order.ordernumber }}" style="width: 100%;">
-                        </td>
+                    <td>
+                        <input type="date" name="finance_order_date" value="{% if order.finance_order_date %}{{ order.finance_order_date|date:'Y-m-d' }}{% endif %}" autocomplete="off" form="inline-order-form-{{ order.id }}" data-inline-autosave>
+                    </td>
 
-                        <td>
-                            <input type="date" name="finance_order_date" value="{% if order.finance_order_date %}{{ order.finance_order_date|date:'Y-m-d' }}{% endif %}">
-                        </td>
+                    <td>
+                        <input type="date" name="shipped_date" value="{% if order.shipped_date %}{{ order.shipped_date|date:'Y-m-d' }}{% endif %}" autocomplete="off" form="inline-order-form-{{ order.id }}" data-inline-autosave>
+                    </td>
 
-                        <td>
-                            <input type="date" name="shipped_date" value="{% if order.shipped_date %}{{ order.shipped_date|date:'Y-m-d' }}{% endif %}">
-                        </td>
+                    <td>
+                        <input type="date" name="received_date" value="{% if order.received_date %}{{ order.received_date|date:'Y-m-d' }}{% endif %}" autocomplete="off" form="inline-order-form-{{ order.id }}" data-inline-autosave>
+                    </td>
 
-                        <td>
-                            <input type="date" name="received_date" value="{% if order.received_date %}{{ order.received_date|date:'Y-m-d' }}{% endif %}">
-                        </td>
-
-                        <td>{{ order.created_at|date:"Y-m-d H:i" }}</td>
-                    </form>
+                    <td>{{ order.created_at|date:"Y-m-d H:i" }}</td>
                 {% else %}
                     <td>{{ order.teacher_remarks|default:"-" }}</td>
 
@@ -407,26 +404,35 @@
                         {% endif %}
                     </td>
                 {% endif %}
-                {% if request.user.role == "admin" %}
-                    <td>
-                        {% if order.status == "approved" or order.status == "rejected" %}
-                            {% if order.decided_at %}
-                                {{ order.decided_at|date:"Y-m-d H:i" }}
-                            {% else %}
-                                -
-                            {% endif %}
-                        {% else %}
-                            -
-                        {% endif %}
-                    </td>
-                {% endif %}
             </tr>
         {% empty %}
             <tr>
-                <td colspan="18">No orders found.</td>
                 <td colspan="18">No orders found.</td>
             </tr>
         {% endfor %}
     </tbody>
 </table>
+<script>
+    document.querySelectorAll("[data-inline-autosave]").forEach((field) => {
+        field.addEventListener("change", () => {
+            const form = field.form;
+            if (!form || form.dataset.inlineAutosaving === "1") {
+                return;
+            }
+
+            form.dataset.inlineAutosaving = "1";
+
+            let autosaveInput = form.querySelector('input[name="inline_autosave"]');
+            if (!autosaveInput) {
+                autosaveInput = document.createElement("input");
+                autosaveInput.type = "hidden";
+                autosaveInput.name = "inline_autosave";
+                form.appendChild(autosaveInput);
+            }
+            autosaveInput.value = "1";
+
+            form.requestSubmit();
+        });
+    });
+</script>
 {% endblock %}
