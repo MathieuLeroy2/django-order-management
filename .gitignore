@@ -57,6 +57,7 @@ docker-compose.yml
 .coverage
 htmlcov/
 .pytest_cache/
+orders/tests.py
 
 # ========================
 # Migrations (optional!)

@@ -336,11 +336,20 @@ def order_list(request):
     settings_obj = AppSettings.get_solo()
     filterable_users = get_filterable_users_for_user(request.user)
 
-    visible_total = orders.aggregate(total=Sum("total_price_excl_vat"))["total"] or Decimal("0.00")
+    orders_for_totals = orders.order_by()
+
+    visible_total = (
+        orders_for_totals.aggregate(total=Sum("total_price_excl_vat"))["total"]
+        or Decimal("0.00")
+    )
 
     totals_by_user_id = {
         row["user_id"]: (row["total"] or Decimal("0.00"))
-        for row in orders.values("user_id").annotate(total=Sum("total_price_excl_vat"))
+        for row in (
+            orders_for_totals.values("user_id")
+            .annotate(total=Sum("total_price_excl_vat"))
+            .order_by()
+        )
     }
 
     spending_rows = []

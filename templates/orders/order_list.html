@@ -27,13 +27,13 @@
 <div style="margin-bottom: 1rem;">
     <p>
         <strong>Total value of currently visible orders:</strong>
-        {{ visible_total|default:"0.00" }}
+        {{ visible_total|default:"0.00"|floatformat:0 }}
     </p>
 
     <p>
         <strong>Soft spending limit:</strong>
         {% if soft_spending_limit %}
-            {{ soft_spending_limit }}
+            {{ soft_spending_limit|floatformat:0 }}
         {% else %}
             Not set
         {% endif %}
@@ -53,10 +53,10 @@
         {% for row in spending_rows %}
             <tr {% if row.is_over_limit %}style="background-color: #ffe0e0;"{% endif %}>
                 <td>{{ row.user.name }}</td>
-                <td>{{ row.requested_total }}</td>
+                <td>{{ row.requested_total|floatformat:0 }}</td>
                 <td>
                     {% if soft_spending_limit %}
-                        {{ soft_spending_limit }}
+                        {{ soft_spending_limit|floatformat:0 }}
                     {% else %}
                         -
                     {% endif %}
