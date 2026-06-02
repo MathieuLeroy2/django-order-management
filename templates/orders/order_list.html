@@ -117,6 +117,7 @@
 
         <div>
             <label for="finance_order_date_filter">Order nr</label><br>
+            <label for="finance_order_date_filter">Order nr</label><br>
             <select name="finance_order_date_filter" id="finance_order_date_filter">
                 <option value="">All</option>
                 <option value="empty" {% if finance_order_date_filter == "empty" %}selected{% endif %}>Empty</option>
@@ -226,9 +227,13 @@
             <th>Actions</th>
             <th>Order number</th>
             <th>Order date</th>
+            <th>Order date</th>
             <th>Shipped date</th>
             <th>Received date</th>
             <th>Created at</th>
+            {% if request.user.role == "admin" %}
+                <th>Accepted/rejected at</th>
+            {% endif %}
             {% if request.user.role == "admin" %}
                 <th>Accepted/rejected at</th>
             {% endif %}
@@ -303,6 +308,10 @@
                                     </div>
                                 </div>
                             {% endif %}
+
+                            <div style="margin-bottom: 0.5rem;">
+                                <a href="{% url 'orders:order_edit' order.id %}">Edit page</a>
+                            </div>
 
                             <div style="margin-bottom: 0.5rem;">
                                 <a href="{% url 'orders:order_edit' order.id %}">Edit page</a>
@@ -404,9 +413,23 @@
                         {% endif %}
                     </td>
                 {% endif %}
+                {% if request.user.role == "admin" %}
+                    <td>
+                        {% if order.status == "approved" or order.status == "rejected" %}
+                            {% if order.decided_at %}
+                                {{ order.decided_at|date:"Y-m-d H:i" }}
+                            {% else %}
+                                -
+                            {% endif %}
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
+                {% endif %}
             </tr>
         {% empty %}
             <tr>
+                <td colspan="18">No orders found.</td>
                 <td colspan="18">No orders found.</td>
             </tr>
         {% endfor %}

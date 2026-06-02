@@ -1,6 +1,7 @@
 from allauth.socialaccount.adapter import DefaultSocialAccountAdapter
 from django.contrib.auth import get_user_model
 from django.core.exceptions import PermissionDenied
+from django.core.exceptions import PermissionDenied
 
 from .models import User
 
@@ -29,7 +30,22 @@ class AuthentikSocialAccountAdapter(DefaultSocialAccountAdapter):
         userinfo = extra.get("userinfo") or {}
         id_token = extra.get("id_token") or {}
 
+        userinfo = extra.get("userinfo") or {}
+        id_token = extra.get("id_token") or {}
+
         username = (
+            userinfo.get("preferred_username")
+            or id_token.get("preferred_username")
+            or userinfo.get("username")
+            or id_token.get("username")
+            or userinfo.get("nickname")
+            or id_token.get("nickname")
+            or userinfo.get("email")
+            or id_token.get("email")
+            or userinfo.get("sub")
+            or id_token.get("sub")
+            or extra.get("preferred_username")
+            or extra.get("username")
             userinfo.get("preferred_username")
             or id_token.get("preferred_username")
             or userinfo.get("username")
@@ -44,9 +60,27 @@ class AuthentikSocialAccountAdapter(DefaultSocialAccountAdapter):
             or extra.get("username")
             or extra.get("nickname")
             or extra.get("email")
+            or extra.get("email")
             or extra.get("sub")
         )
 
+        if username:
+            username = str(username).strip()
+
+        email = (
+            userinfo.get("email")
+            or id_token.get("email")
+            or extra.get("email")
+            or ""
+        )
+
+        name = (
+            userinfo.get("name")
+            or id_token.get("name")
+            or extra.get("name")
+            or username
+            or ""
+        )
         if username:
             username = str(username).strip()
 
@@ -72,8 +106,17 @@ class AuthentikSocialAccountAdapter(DefaultSocialAccountAdapter):
             or []
         )
 
+        groups = (
+            userinfo.get("groups")
+            or id_token.get("groups")
+            or extra.get("groups")
+            or []
+        )
+
         if isinstance(groups, str):
             groups = [groups]
+        elif not isinstance(groups, list):
+            groups = list(groups) if groups else []
         elif not isinstance(groups, list):
             groups = list(groups) if groups else []
 
@@ -83,6 +126,9 @@ class AuthentikSocialAccountAdapter(DefaultSocialAccountAdapter):
             "name": name,
             "groups": groups,
         }
+
+    def _has_allowed_group(self, data):
+        return bool(set(data["groups"]) & ALLOWED_GROUPS)
 
     def _has_allowed_group(self, data):
         return bool(set(data["groups"]) & ALLOWED_GROUPS)
@@ -97,9 +143,21 @@ class AuthentikSocialAccountAdapter(DefaultSocialAccountAdapter):
                 "to one of the allowed Bestellingen groups."
             )
 
+        groups = set(data["groups"])
+
+        if not self._has_allowed_group(data):
+            user.is_active = False
+            raise PermissionDenied(
+                "You are authenticated in Authentik, but you are not assigned "
+                "to one of the allowed Bestellingen groups."
+            )
+
         if data["username"]:
             user.username = data["username"]
 
+        user.email = data["email"] or ""
+        user.name = data["name"] or ""
+        user.is_active = True
         user.email = data["email"] or ""
         user.name = data["name"] or ""
         user.is_active = True
@@ -133,7 +191,20 @@ class AuthentikSocialAccountAdapter(DefaultSocialAccountAdapter):
                 "to access this application."
             )
 
+
+        if not self._has_allowed_group(data):
+            raise PermissionDenied(
+                "You are authenticated in Authentik, but you are not allowed "
+                "to access this application."
+            )
+
         UserModel = get_user_model()
+
+        if sociallogin.is_existing:
+            user = sociallogin.user
+            self._sync_user_fields(user, data)
+            user.save()
+            return
 
         if sociallogin.is_existing:
             user = sociallogin.user
