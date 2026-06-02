@@ -105,9 +105,32 @@ DJANGO_AUTH_MODE=local python manage.py runserver
 ```
 
 Local login uses Django username/password accounts at `/accounts/login/`.
-After creating a user, set their application role in Django admin if they need admin or teacher access inside the order workflow.
+This mode is only enabled when `DJANGO_AUTH_MODE=local`; production should keep `DJANGO_AUTH_MODE=authentik` or omit the variable, because Authentik is the default.
 
-### 6. Start the development server
+### 6. Add local test users
+
+Open the Django admin at:
+
+```text
+http://127.0.0.1:80/admin/
+```
+
+Log in with the superuser created above. Add or edit users under `Accounts > Users`.
+
+For each local test user, set:
+
+- `Username`
+- `Password`
+- `Name`
+- `Email`
+- `Role`: `Admin`, `Teacher`, or `Student`
+- `Active`: checked
+
+To let a teacher see student orders, add links under `Accounts > Teacher student links`.
+
+These local users do not change the production login flow. In Authentik mode, login still redirects to Authentik and roles are synchronized from Authentik groups.
+
+### 7. Start the development server
 
 ```bash
 python manage.py runserver
@@ -174,6 +197,17 @@ volumes:
 
 Adjust these values if needed for your server or domain.
 
+For local Docker testing without Authentik, use these environment values in your local `docker-compose.yml`:
+
+```yaml
+DJANGO_DEBUG: "True"
+DJANGO_ALLOWED_HOSTS: "localhost,127.0.0.1"
+DJANGO_CSRF_TRUSTED_ORIGINS: "http://localhost,http://127.0.0.1"
+DJANGO_AUTH_MODE: "local"
+```
+
+For production, keep `DJANGO_AUTH_MODE: "authentik"` or omit it.
+
 ### 3. Build and start the containers
 
 ```bash
@@ -201,6 +235,8 @@ docker compose exec web python manage.py createsuperuser
 ```
 
 This is the command you should use to add the initial administrator account inside the running container.
+
+When running with `DJANGO_AUTH_MODE=local`, use this admin account at `/admin/` to create local test users and assign their order workflow roles.
 
 ### 6. Open the application
 
