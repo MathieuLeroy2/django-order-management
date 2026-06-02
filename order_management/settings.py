@@ -1,6 +1,8 @@
 from pathlib import Path
 import os
 
+from django.core.exceptions import ImproperlyConfigured
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = os.environ.get(
@@ -9,6 +11,13 @@ SECRET_KEY = os.environ.get(
 )
 
 DEBUG = os.environ.get("DJANGO_DEBUG", "True").lower() == "true"
+
+AUTH_MODE = os.environ.get("DJANGO_AUTH_MODE", "authentik").strip().lower()
+if AUTH_MODE not in {"authentik", "local"}:
+    raise ImproperlyConfigured(
+        "DJANGO_AUTH_MODE must be either 'authentik' or 'local'."
+    )
+USE_AUTHENTIK = AUTH_MODE == "authentik"
 
 ALLOWED_HOSTS = [
     host.strip()
@@ -100,6 +109,7 @@ AUTHENTICATION_BACKENDS = [
     "allauth.account.auth_backends.AuthenticationBackend",
 ]
 
+LOGIN_URL = "/accounts/login/"
 LOGIN_REDIRECT_URL = "/"
 LOGOUT_REDIRECT_URL = "/"
 
@@ -107,11 +117,12 @@ ACCOUNT_EMAIL_VERIFICATION = "none"
 ACCOUNT_USERNAME_REQUIRED = True
 ACCOUNT_EMAIL_REQUIRED = False
 
-SOCIALACCOUNT_AUTO_SIGNUP = True
-SOCIALACCOUNT_ONLY = True
-SOCIALACCOUNT_LOGIN_ON_GET = True
+SOCIALACCOUNT_AUTO_SIGNUP = USE_AUTHENTIK
+SOCIALACCOUNT_ONLY = USE_AUTHENTIK
+SOCIALACCOUNT_LOGIN_ON_GET = USE_AUTHENTIK
 
-SOCIALACCOUNT_ADAPTER = "accounts.adapters.AuthentikSocialAccountAdapter"
+if USE_AUTHENTIK:
+    SOCIALACCOUNT_ADAPTER = "accounts.adapters.AuthentikSocialAccountAdapter"
 
 AUTHENTIK_ADMIN_GROUP = os.environ.get(
     "AUTHENTIK_ADMIN_GROUP",
@@ -126,21 +137,25 @@ AUTHENTIK_STUDENT_GROUP = os.environ.get(
     "bestellingenNoord-student",
 )
 
-SOCIALACCOUNT_PROVIDERS = {
-    "openid_connect": {
-        "APPS": [
-            {
-                "provider_id": "authentik",
-                "name": "Authentik",
-                "client_id": os.environ.get("AUTHENTIK_CLIENT_ID"),
-                "secret": os.environ.get("AUTHENTIK_CLIENT_SECRET"),
-                "settings": {
-                    "server_url": os.environ.get("AUTHENTIK_SERVER_URL"),
-                },
-            }
-        ]
+SOCIALACCOUNT_PROVIDERS = (
+    {
+        "openid_connect": {
+            "APPS": [
+                {
+                    "provider_id": "authentik",
+                    "name": "Authentik",
+                    "client_id": os.environ.get("AUTHENTIK_CLIENT_ID"),
+                    "secret": os.environ.get("AUTHENTIK_CLIENT_SECRET"),
+                    "settings": {
+                        "server_url": os.environ.get("AUTHENTIK_SERVER_URL"),
+                    },
+                }
+            ]
+        }
     }
-}
+    if USE_AUTHENTIK
+    else {}
+)
 
 
 LANGUAGE_CODE = "en-us"

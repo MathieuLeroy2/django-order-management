@@ -98,6 +98,15 @@ python manage.py migrate
 python manage.py createsuperuser
 ```
 
+For local development without Authentik, start Django with local auth enabled:
+
+```bash
+DJANGO_AUTH_MODE=local python manage.py runserver
+```
+
+Local login uses Django username/password accounts at `/accounts/login/`.
+After creating a user, set their application role in Django admin if they need admin or teacher access inside the order workflow.
+
 ### 6. Start the development server
 
 ```bash
@@ -154,6 +163,7 @@ services:
       DJANGO_ALLOWED_HOSTS: "localhost,127.0.0.1"
       DJANGO_CSRF_TRUSTED_ORIGINS: "http://localhost:8000"
       DJANGO_SQLITE_PATH: "/data/db.sqlite3"
+      DJANGO_AUTH_MODE: "authentik"
     volumes:
       - django_order_data:/data
     restart: unless-stopped

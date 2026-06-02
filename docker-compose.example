@@ -10,6 +10,9 @@ services:
       DJANGO_ALLOWED_HOSTS: "bestellingen.voltlab.net"
       DJANGO_CSRF_TRUSTED_ORIGINS: "https://bestellingen.voltlab.net"
       DJANGO_SQLITE_PATH: "/data/db.sqlite3"
+      #Only uncomment DJANGO_AUTH_MODE if you want to locally test without Authentik
+      #Standard behavior of DJANGO_AUTH_MODE is to use authentik (production)
+      #DJANGO_AUTH_MODE: "local"
       AUTHENTIK_CLIENT_ID: "SECRET"
       AUTHENTIK_CLIENT_SECRET: "SECRET"
       AUTHENTIK_SERVER_URL: "https://auth.voltlab.net/application/o/bestellingen-noord"

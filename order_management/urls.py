@@ -1,27 +1,35 @@
+from django.conf import settings
 from django.contrib import admin
-from django.urls import path, include, reverse
-from django.urls import path, include, reverse
+from django.contrib.auth.views import LoginView, LogoutView
 from django.shortcuts import redirect
-from allauth.account.views import LogoutView
-from allauth.account.views import LogoutView
+from django.urls import include, path, reverse
+from allauth.account.views import LogoutView as AllauthLogoutView
 
 
-def login_redirect(request):
-    return redirect(reverse("openid_connect_login", kwargs={"provider_id": "authentik"}))
+def authentik_login_redirect(request):
     return redirect(reverse("openid_connect_login", kwargs={"provider_id": "authentik"}))
 
 
 urlpatterns = [
     path("admin/", admin.site.urls),
+]
 
-    # Existing app login/logout names kept for old templates
-    path("accounts/login/", login_redirect, name="login"),
-    path("accounts/logout/", LogoutView.as_view(), name="logout"),
-    path("accounts/logout/", LogoutView.as_view(), name="logout"),
+if settings.USE_AUTHENTIK:
+    urlpatterns += [
+        path("accounts/login/", authentik_login_redirect, name="login"),
+        path("accounts/logout/", AllauthLogoutView.as_view(), name="logout"),
+        path("accounts/", include("allauth.urls")),
+    ]
+else:
+    urlpatterns += [
+        path(
+            "accounts/login/",
+            LoginView.as_view(template_name="registration/login.html"),
+            name="login",
+        ),
+        path("accounts/logout/", LogoutView.as_view(), name="logout"),
+    ]
 
-    # django-allauth routes
-    path("accounts/", include("allauth.urls")),
-
-    # App routes
+urlpatterns += [
     path("", include("orders.urls")),
 ]
