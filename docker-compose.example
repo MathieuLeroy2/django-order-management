@@ -13,6 +13,9 @@ services:
       AUTHENTIK_CLIENT_ID: "SECRET"
       AUTHENTIK_CLIENT_SECRET: "SECRET"
       AUTHENTIK_SERVER_URL: "https://auth.voltlab.net/application/o/bestellingen-noord"
+      AUTHENTIK_ADMIN_GROUP: "bestellingenNoord-admin"
+      AUTHENTIK_TEACHER_GROUP: "bestellingenNoord-teacher"
+      AUTHENTIK_STUDENT_GROUP: "bestellingenNoord-student"
     volumes:
       - django_order_data-test:/data
     restart: unless-stopped

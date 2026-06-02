@@ -113,6 +113,19 @@ SOCIALACCOUNT_LOGIN_ON_GET = True
 
 SOCIALACCOUNT_ADAPTER = "accounts.adapters.AuthentikSocialAccountAdapter"
 
+AUTHENTIK_ADMIN_GROUP = os.environ.get(
+    "AUTHENTIK_ADMIN_GROUP",
+    "bestellingenNoord-admin",
+)
+AUTHENTIK_TEACHER_GROUP = os.environ.get(
+    "AUTHENTIK_TEACHER_GROUP",
+    "bestellingenNoord-teacher",
+)
+AUTHENTIK_STUDENT_GROUP = os.environ.get(
+    "AUTHENTIK_STUDENT_GROUP",
+    "bestellingenNoord-student",
+)
+
 SOCIALACCOUNT_PROVIDERS = {
     "openid_connect": {
         "APPS": [
